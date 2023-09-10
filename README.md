@@ -1,2 +1,2 @@
-# eversolo
-Eversolo Integration for Home Assistant
+# Eversolo Integration
+TODO

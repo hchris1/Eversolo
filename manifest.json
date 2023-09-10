@@ -1,0 +1,8 @@
+{
+  "domain": "eversolo",
+  "name": "Eversolo Light",
+  "documentation": "https://your-documentation-url.com",
+  "dependencies": [],
+  "codeowners": ["@your-github-username"],
+  "requirements": []
+}
