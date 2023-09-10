@@ -9,14 +9,11 @@
 
 [![Community Forum][forum-shield]][forum]
 
-_Integration to integrate with [Eversolo Digital Streamers](https://www.eversolo.com/)._
+_Integration for [Eversolo Digital Streamers](https://www.eversolo.com/)._
 
 ## Description
 
 This custom component integrates Eversolo Digital Streamers into [Home Assistant](https://www.home-assistant.io/). 
-
-**Warning**
-This integration is only tested on the **Eversolo DMP-A6**. Tests and contributions to verify and support more Eversolo devices are welcome!
 
 It provides the following entities:
 
@@ -31,6 +28,9 @@ It provides the following entities:
 | Media Player  | Eversolo                   | Media controls                                                                |
 | Select        | VU Style                   | Selects between the 4 available VU styles                                     |
 | Sensor        | Version                    | Provides firmware version                                                     |
+
+> [!IMPORTANT]
+> This integration is only tested on the **Eversolo DMP-A6**. Tests and contributions to verify and support more Eversolo devices are welcome!
 
 ## Installation
 
