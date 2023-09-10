@@ -36,7 +36,7 @@ It provides the following entities:
 
 ### Install with HACS (recommended)
 
-In case you have [HACS](https://hacs.xyz/) installed already, just search for Eversolo and install it. Restart Home Assistant afterwards to load the added integration. HACS will keep track of updates so you can install component updates when available.
+In case you have [HACS](https://hacs.xyz/) installed already, add this repository as a custom repository and install it. Restart Home Assistant afterwards to load the added integration. HACS will keep track of updates so you can install component updates when available.
 
 ### Install manually
 
