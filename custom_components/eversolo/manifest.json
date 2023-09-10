@@ -2,7 +2,7 @@
   "domain": "eversolo",
   "name": "Eversolo",
   "codeowners": [
-    "@hchris"
+    "@hchris1"
   ],
   "config_flow": true,
   "documentation": "https://github.com/hchris1/Eversolo",
