@@ -63,7 +63,7 @@ ENTITY_DESCRIPTIONS = [
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
-    """Set up the sensor platform."""
+    """Set up the Light platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_devices(
@@ -76,14 +76,14 @@ async def async_setup_entry(hass, entry, async_add_devices):
 
 
 class EversoloLight(EversoloEntity, LightEntity):
-    """Light to control Eversolo display brightness."""
+    """Light to control Eversolo Lights."""
 
     def __init__(
         self,
         coordinator: EversoloDataUpdateCoordinator,
         entity_description: LightEntityDescription,
     ) -> None:
-        """Initialize the switch class."""
+        """Initialize the Light class."""
         super().__init__(coordinator)
         self.entity_description = entity_description
         self._attr_supported_color_modes = {ColorMode.BRIGHTNESS}
@@ -94,20 +94,21 @@ class EversoloLight(EversoloEntity, LightEntity):
 
     @property
     def is_on(self) -> bool:
-        """Return true if the switch is on."""
+        """Return true if the Light is on."""
         return self.coordinator.data.get(self.entity_description.brightness_key, 0) > 0
 
     @property
     def brightness(self):
+        """Return brightness in range 0..255."""
         return self.coordinator.data.get(self.entity_description.brightness_key, 0)
 
     async def async_turn_on(self, **kwargs: any) -> None:
-        """Turn on the switch."""
+        """Turn on the Light."""
         brightness = kwargs.get(ATTR_BRIGHTNESS, 255)
         await self.entity_description.set_brightness(self.coordinator, brightness)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **_: any) -> None:
-        """Turn off the switch."""
+        """Turn off the Light."""
         await self.entity_description.set_brightness(self.coordinator, 0)
         await self.coordinator.async_request_refresh()

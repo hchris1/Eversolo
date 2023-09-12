@@ -15,7 +15,7 @@ VERSION_ENTITY_DESCRIPTION = SensorEntityDescription(
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
-    """Set up the sensor platform."""
+    """Set up the Sensor platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     new_devices = []
     new_devices.append(EversoloVersionSensor(coordinator=coordinator, entity_description=VERSION_ENTITY_DESCRIPTION))
@@ -32,14 +32,14 @@ class EversoloVersionSensor(EversoloEntity, SensorEntity):
         coordinator: EversoloDataUpdateCoordinator,
         entity_description: SensorEntityDescription,
     ) -> None:
-        """Initialize the sensor class."""
+        """Initialize the Sensor class."""
         super().__init__(coordinator)
         self.entity_description = entity_description
         self._attr_unique_id = f'{coordinator.config_entry.entry_id}_{entity_description.key}'
 
     @property
     def native_value(self) -> str:
-        """Return the native value of the sensor."""
+        """Return the native value of the Sensor."""
         state = self.coordinator.data.get('music_control_state', None)
 
         if state is None:

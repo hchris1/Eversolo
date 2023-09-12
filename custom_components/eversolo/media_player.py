@@ -1,4 +1,4 @@
-"""Support for Onkyo Receivers."""
+"""Media Player platform for eversolo."""
 from __future__ import annotations
 
 
@@ -35,17 +35,17 @@ AVAILABLE_SOURCES = {
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
-    """Set up the sensor platform."""
+    """Set up the Media Player platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_devices([EversoloMediaPlayer(coordinator, entry)])
 
 
 class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
-    """Eversolo media player."""
+    """Eversolo Media Player."""
 
     def __init__(self, coordinator: EversoloDataUpdateCoordinator, config_entry):
-        """Initialize the media player."""
+        """Initialize the Media Player."""
         super().__init__(coordinator)
         self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
         self._attr_supported_features = SUPPORT_FEATURES
@@ -56,10 +56,12 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     @property
     def name(self):
+        """Return name."""
         return self._name
 
     @property
     def state(self):
+        """Return Media Player state."""
         music_control_state = self.coordinator.data.get('music_control_state', None)
 
         if music_control_state is None:
@@ -79,11 +81,12 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     @property
     def device_info(self):
+        """Return Media Player device info."""
         return {}
 
     @property
     def volume_level(self):
-        """Volume level of the media player (0..1)."""
+        """Volume level of the Media Player in range 0..1."""
         music_control_state = self.coordinator.data.get('music_control_state', None)
 
         if music_control_state is None:
@@ -95,6 +98,7 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     @property
     def is_volume_muted(self):
+        """Return muted state."""
         music_control_state = self.coordinator.data.get('music_control_state', None)
 
         if music_control_state is None:
@@ -228,7 +232,7 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         return position
 
     async def async_turn_off(self):
-        """Turn off media player."""
+        """Turn off Media Player."""
         await self.coordinator.client.async_trigger_power_off()
         await self.coordinator.async_request_refresh()
 
@@ -246,12 +250,12 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         await self.coordinator.async_request_refresh()
 
     async def async_volume_up(self):
-        """Volume up the media player."""
+        """Volume up the Media Player."""
         await self.coordinator.client.async_volume_up()
         await self.coordinator.async_request_refresh()
 
     async def async_volume_down(self):
-        """Volume down media player."""
+        """Volume down Media Player."""
         await self.coordinator.client.async_volume_down()
         await self.coordinator.async_request_refresh()
 
@@ -270,7 +274,7 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
             index += 1
 
     async def async_media_play_pause(self):
-        """Simulate play pause media player."""
+        """Simulate play pause Media Player."""
         await self.coordinator.client.async_toggle_play_pause()
         await self.coordinator.async_request_refresh()
 
@@ -281,7 +285,7 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
             await self.coordinator.async_request_refresh()
 
     async def async_media_pause(self):
-        """Send media pause command."""
+        """Send pause command."""
         if self._state is MediaPlayerState.PLAYING:
             await self.coordinator.client.async_toggle_play_pause()
             await self.coordinator.async_request_refresh()

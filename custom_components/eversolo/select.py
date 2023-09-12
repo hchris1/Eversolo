@@ -48,7 +48,7 @@ ENTITY_DESCRIPTIONS = [
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
-    """Set up the sensor platform."""
+    """Set up the Select platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_devices(
@@ -61,14 +61,14 @@ async def async_setup_entry(hass, entry, async_add_devices):
 
 
 class EversoloSelect(EversoloEntity, SelectEntity):
-    """Select to control Eversolo display brightness."""
+    """Select to control Eversolo Selects."""
 
     def __init__(
         self,
         coordinator: EversoloDataUpdateCoordinator,
         entity_description: SelectEntityDescription,
     ) -> None:
-        """Initialize the switch class."""
+        """Initialize the Select class."""
         super().__init__(coordinator)
         self.entity_description = entity_description
         self._attr_options = self.entity_description.available_options
@@ -78,6 +78,7 @@ class EversoloSelect(EversoloEntity, SelectEntity):
 
     @property
     def current_option(self) -> str:
+        """Return current VU style."""
         vu_mode_state = self.coordinator.data.get('vu_mode_state', None)
 
         if vu_mode_state is None:

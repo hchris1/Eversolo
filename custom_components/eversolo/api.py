@@ -1,4 +1,4 @@
-"""Sample API Client."""
+"""Eversolo API Client."""
 from __future__ import annotations
 
 import aiohttp
@@ -23,7 +23,7 @@ class EversoloApiClientAuthenticationError(EversoloApiClientError):
 
 
 class EversoloApiClient:
-    """Sample API Client."""
+    """Eversolo API Client."""
 
     def __init__(
         self,
@@ -31,7 +31,7 @@ class EversoloApiClient:
         port: int,
         session: aiohttp.ClientSession,
     ) -> None:
-        """Sample API Client."""
+        """Eversolo API Client."""
         self._host = host
         self._port = port
         self._session = session
@@ -45,15 +45,9 @@ class EversoloApiClient:
             'music_control_state': await self.async_get_music_control_state(),
             'vu_mode_state': await self.async_get_vu_mode_state(),
         }
-        # result = {}
-        # result['display_brightness'] = await self.async_get_display_brightness()
-        # result['knob_brightness'] = await self.async_get_knob_brightness()
-        # result['music_control_state'] = await self.async_get_music_control_state()
-        # result['input_output_state'] = await self.async_get_input_output_state()
-        # result['vu_mode_state'] = await self.async_get_vu_mode_state()
-        # return result
 
     async def async_get_music_control_state(self):
+        """Return music control state."""
         result = await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/getState',
@@ -61,6 +55,7 @@ class EversoloApiClient:
         return result
 
     async def async_get_input_output_state(self):
+        """Return input/output state."""
         result = await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/getInputAndOutputList',
@@ -68,6 +63,7 @@ class EversoloApiClient:
         return result
 
     async def async_get_vu_mode_state(self):
+        """Return VU mode state."""
         result = await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/SystemSettings/displaySettings/getVUModeList',
@@ -75,6 +71,7 @@ class EversoloApiClient:
         return result
 
     async def async_get_display_brightness(self) -> any:
+        """Return the display brightness in range 0..255."""
         result = await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/SystemSettings/displaySettings/getScreenBrightness',
@@ -83,6 +80,7 @@ class EversoloApiClient:
         return round(result['currentValue'] * (255 / 115))
 
     async def async_set_display_brightness(self, value) -> any:
+        """Set the display brightness to a value in range 0..255."""
         # Max value for brightness is 115
         brightness = round(value * (115 / 255))
         return await self._api_wrapper(
@@ -92,6 +90,7 @@ class EversoloApiClient:
         )
 
     async def async_get_knob_brightness(self) -> any:
+        """Return the knob brightness in range 0..255."""
         result = await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/SystemSettings/displaySettings/getKnobBrightness',
@@ -100,6 +99,7 @@ class EversoloApiClient:
         return round(result['currentValue'] * (255 / 115))
 
     async def async_set_knob_brightness(self, value) -> any:
+        """Set the knob brightness to a value in range 0..255."""
         # Max value for brightness is 115
         brightness = round(value * (115 / 255))
         return await self._api_wrapper(
@@ -109,6 +109,7 @@ class EversoloApiClient:
         )
 
     async def async_trigger_reboot(self) -> any:
+        """Reboots the device."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setPowerOption?tag=reboot',
@@ -116,6 +117,7 @@ class EversoloApiClient:
         )
 
     async def async_trigger_power_off(self) -> any:
+        """Powers off the device."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setPowerOption?tag=poweroff',
@@ -123,6 +125,7 @@ class EversoloApiClient:
         )
 
     async def async_trigger_toggle_screen(self) -> any:
+        """Toggles screen on/off."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setPowerOption?tag=screen',
@@ -130,6 +133,7 @@ class EversoloApiClient:
         )
 
     async def async_trigger_cycle_screen_mode(self) -> any:
+        """Goes to the next screen."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/changVUDisplay',
@@ -137,6 +141,7 @@ class EversoloApiClient:
         )
 
     async def async_select_vu_mode_option(self, index) -> any:
+        """Select the VU meter style."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/SystemSettings/displaySettings/setVUMode?index={index}',
@@ -144,6 +149,7 @@ class EversoloApiClient:
         )
 
     async def async_mute(self) -> any:
+        """Mutes the output."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setMuteVolume?isMute=1',
@@ -151,6 +157,7 @@ class EversoloApiClient:
         )
 
     async def async_unmute(self) -> any:
+        """Unmutes the output."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setMuteVolume?isMute=0',
@@ -158,6 +165,7 @@ class EversoloApiClient:
         )
 
     async def async_volume_down(self) -> any:
+        """Decreases the volume by one step."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.VolumeDown',
@@ -165,6 +173,7 @@ class EversoloApiClient:
         )
 
     async def async_volume_up(self) -> any:
+        """Increases the volume by one step."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.VolumeUp',
@@ -172,6 +181,7 @@ class EversoloApiClient:
         )
 
     async def async_toggle_play_pause(self) -> any:
+        """Toggles between play and pause."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/playOrPause',
@@ -179,6 +189,7 @@ class EversoloApiClient:
         )
 
     async def async_previous_title(self) -> any:
+        """Plays the previous title."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/playLast',
@@ -186,6 +197,7 @@ class EversoloApiClient:
         )
 
     async def async_next_title(self) -> any:
+        """Plays the next title."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/playNext',
@@ -193,6 +205,7 @@ class EversoloApiClient:
         )
 
     async def async_seek_time(self, time) -> any:
+        """Seeks to a time given in milliseconds."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/seekTo?time={time}',
@@ -200,6 +213,7 @@ class EversoloApiClient:
         )
 
     async def async_set_volume(self, volume) -> any:
+        """Set the volume."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setDevicesVolume?volume={volume}',
@@ -207,6 +221,7 @@ class EversoloApiClient:
         )
 
     async def async_set_input(self, index, tag) -> any:
+        """Set the input/source."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setInputList?tag={tag}&index={index}',
@@ -214,6 +229,7 @@ class EversoloApiClient:
         )
 
     async def async_set_output(self, index, tag) -> any:
+        """Set the output."""
         await self._api_wrapper(
             method='get',
             url=f'http://{self._host}:{self._port}/ZidooMusicControl/v2/setOutInputList?tag={tag}&index={index}',
@@ -221,6 +237,7 @@ class EversoloApiClient:
         )
 
     def create_internal_image_url(self, song_id) -> any:
+        """Create url to fetch album covers when using the internal player."""
         return f'http://{self._host}:{self._port}/ZidooMusicControl/v2/getImage?id={song_id}&target=16'
 
     async def _api_wrapper(
