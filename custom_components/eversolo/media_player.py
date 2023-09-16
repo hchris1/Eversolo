@@ -1,6 +1,7 @@
 """Media Player platform for eversolo."""
 from __future__ import annotations
 
+import datetime as dt
 
 from homeassistant.components.media_player import (
     MediaPlayerDeviceClass,
@@ -9,7 +10,7 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
 )
 
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
@@ -23,14 +24,15 @@ SUPPORT_FEATURES = (
     | MediaPlayerEntityFeature.VOLUME_STEP
     | MediaPlayerEntityFeature.PREVIOUS_TRACK
     | MediaPlayerEntityFeature.NEXT_TRACK
+    | MediaPlayerEntityFeature.SEEK
 )
 
 AVAILABLE_SOURCES = {
-    'XMOS': 'Internal Player',
-    'BT': 'Bluetooth',
-    'USB': 'USB-C',
-    'SPDIF': 'SPDIF',
-    'RCA': 'Coaxial',
+    "XMOS": "Internal Player",
+    "BT": "Bluetooth",
+    "USB": "USB-C",
+    "SPDIF": "SPDIF",
+    "RCA": "Coaxial",
 }
 
 
@@ -49,9 +51,9 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         super().__init__(coordinator)
         self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
         self._attr_supported_features = SUPPORT_FEATURES
-        self._attr_unique_id = f'{coordinator.config_entry.entry_id}_media_player'
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_media_player"
         self._config_entry = config_entry
-        self._name = 'Eversolo'
+        self._name = "Eversolo"
         self._state = None
 
     @property
@@ -62,19 +64,23 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def state(self):
         """Return Media Player state."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             self._state = None
             return self._state
 
-        if int(music_control_state['state']) == 0:
+        state = int(music_control_state.get("state", -1))
+
+        if state == 0:
             self._state = MediaPlayerState.IDLE
-        elif int(music_control_state['state']) == 3:
+        elif state == 3:
             self._state = MediaPlayerState.PLAYING
-        elif int(music_control_state['state']) == 4:
+            self._attr_media_position_updated_at = dt.datetime.now()
+        elif state == 4:
             self._state = MediaPlayerState.PAUSED
         else:
+            LOGGER.debug("Unknown state: %s", state)
             self._state = None
 
         return self._state
@@ -87,34 +93,49 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def volume_level(self):
         """Volume level of the Media Player in range 0..1."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
-        return float(music_control_state['volumeData']['currenttVolume']) / float(
-            music_control_state['volumeData']['maxVolume']
+        current_volume = music_control_state.get("volumeData", {}).get(
+            "currenttVolume", None
         )
+        max_volume = music_control_state.get("volumeData", {}).get("maxVolume", None)
+
+        if current_volume is None or max_volume is None:
+            LOGGER.debug(
+                "Current volume or max volume invalid in music control state: %s",
+                music_control_state,
+            )
+            return None
+
+        return float(current_volume) / float(max_volume)
 
     @property
     def is_volume_muted(self):
         """Return muted state."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
-        return music_control_state['volumeData']['isMute']
+        return music_control_state.get("volumeData", {}).get("isMute", None)
 
     @property
     def source(self):
         """Return the current input source."""
-        input_output_state = self.coordinator.data.get('input_output_state', None)
+        input_output_state = self.coordinator.data.get("input_output_state", None)
 
         if input_output_state is None:
             return None
 
-        return list(AVAILABLE_SOURCES.values())[input_output_state['inputIndex']]
+        input_index = input_output_state.get("inputIndex", -1)
+        if input_index < 0 or input_index >= len(AVAILABLE_SOURCES):
+            LOGGER.debug("Input index %s is out of range", input_index)
+            return None
+
+        return list(AVAILABLE_SOURCES.values())[input_index]
 
     @property
     def source_list(self):
@@ -124,112 +145,138 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_title(self):
         """Title of current playing media."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
+        play_type = music_control_state.get("playType", None)
+
         # Bluetooth or Spotify Connect
-        if music_control_state['playType'] == 4 or music_control_state['playType'] == 6:
-            return music_control_state['everSoloPlayInfo']['everSoloPlayAudioInfo'][
-                'songName'
-            ]
+        if play_type == 4 or play_type == 6:
+            return (
+                music_control_state.get("everSoloPlayInfo", {})
+                .get("everSoloPlayAudioInfo", {})
+                .get("songName", None)
+            )
 
         # Internal Player
-        if music_control_state['playType'] == 5:
-            return music_control_state['playingMusic']['title']
+        if play_type == 5:
+            return music_control_state.get("playingMusic", {}).get("title", None)
 
         return None
 
     @property
     def media_artist(self):
         """Artist of current playing media."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
+        play_type = music_control_state.get("playType", None)
+
         # Bluetooth or Spotify Connect
-        if music_control_state['playType'] == 4 or music_control_state['playType'] == 6:
-            return music_control_state['everSoloPlayInfo']['everSoloPlayAudioInfo'][
-                'artistName'
-            ]
+        if play_type == 4 or play_type == 6:
+            return (
+                music_control_state.get("everSoloPlayInfo", {})
+                .get("everSoloPlayAudioInfo", {})
+                .get("artistName", None)
+            )
 
         # Internal Player
-        if music_control_state['playType'] == 5:
-            return music_control_state['playingMusic']['artist']
+        if play_type == 5:
+            return music_control_state.get("playingMusic", {}).get("artist", None)
 
         return None
 
     @property
     def media_album_name(self):
         """Album of current playing media."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
+        play_type = music_control_state.get("playType", None)
+
         # Bluetooth or Spotify Connect
-        if music_control_state['playType'] == 4 or music_control_state['playType'] == 6:
-            return music_control_state['everSoloPlayInfo']['everSoloPlayAudioInfo'][
-                'albumName'
-            ]
+        if play_type == 4 or play_type == 6:
+            return (
+                music_control_state.get("everSoloPlayInfo", {})
+                .get("everSoloPlayAudioInfo", {})
+                .get("albumName", None)
+            )
 
         # Internal Player
-        if music_control_state['playType'] == 5:
-            return music_control_state['playingMusic']['album']
+        if play_type == 5:
+            return music_control_state.get("playingMusic", {}).get("album", None)
 
         return None
 
     @property
     def media_image_url(self):
         """Image url of current playing media."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
+        play_type = music_control_state.get("playType", None)
+
         # Bluetooth or Spotify Connect
-        if music_control_state['playType'] == 6:
-            return music_control_state['everSoloPlayInfo']['everSoloPlayAudioInfo'][
-                'albumUrl'
-            ].replace('\\/', '/')
+        if play_type == 6:
+            album_url = (
+                music_control_state.get("everSoloPlayInfo", {})
+                .get("everSoloPlayAudioInfo", {})
+                .get("albumUrl", None)
+            )
+
+            if album_url is not None:
+                return album_url
 
         # Internal Player
-        if music_control_state['playType'] == 5:
-            return self.coordinator.client.create_internal_image_url(
-                music_control_state['playingMusic']['id']
-            )
+        if play_type == 5:
+            song_id = music_control_state.get("playingMusic", {}).get("id", None)
+            if song_id is not None:
+                return self.coordinator.client.create_internal_image_url(song_id)
 
         return None
 
     @property
     def media_duration(self):
         """Duration of current playing media in seconds."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
-        position = music_control_state['duration']
+        duration = music_control_state.get("duration", None)
 
-        if position == 0:
+        if duration is None or duration == 0:
             return None
-        return position
+
+        return duration / 1000
 
     @property
     def media_position(self):
         """Position of current playing media in seconds."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return None
 
-        position = music_control_state['position']
+        position = music_control_state.get("position", None)
 
-        if position == 0:
+        if position is None or position == 0:
             return None
-        return position
+
+        return position / 1000
+
+    async def async_media_seek(self, position: float):
+        """Seek the media to a specific location."""
+        await self.coordinator.client.async_seek_time(round(position * 1000))
+        await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self):
         """Turn off Media Player."""
@@ -238,13 +285,13 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     async def async_set_volume_level(self, volume: float) -> None:
         """Set volume level, range 0..1."""
-        music_control_state = self.coordinator.data.get('music_control_state', None)
+        music_control_state = self.coordinator.data.get("music_control_state", None)
 
         if music_control_state is None:
             return
 
         converted_volume = round(
-            volume * int(music_control_state['volumeData']['maxVolume'])
+            volume * int(music_control_state.get("volumeData", {}).get("maxVolume", 0))
         )
         await self.coordinator.client.async_set_volume(converted_volume)
         await self.coordinator.async_request_refresh()

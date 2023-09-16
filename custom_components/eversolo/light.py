@@ -12,13 +12,12 @@ from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
 )
 
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
-
 _EversoloDataUpdateCoordinatorT = TypeVar(
-    '_EversoloDataUpdateCoordinatorT', bound=EversoloDataUpdateCoordinator
+    "_EversoloDataUpdateCoordinatorT", bound=EversoloDataUpdateCoordinator
 )
 
 
@@ -42,19 +41,19 @@ class EversoloLightDescription(
 
 ENTITY_DESCRIPTIONS = [
     EversoloLightDescription[EversoloDataUpdateCoordinator](
-        key='display',
-        name='Eversolo Display',
-        icon='mdi:tablet',
-        brightness_key='display_brightness',
+        key="display",
+        name="Eversolo Display",
+        icon="mdi:tablet",
+        brightness_key="display_brightness",
         set_brightness=lambda coordinator, brightness: coordinator.client.async_set_display_brightness(
             brightness
         ),
     ),
     EversoloLightDescription[EversoloDataUpdateCoordinator](
-        key='knob',
-        name='Eversolo Knob',
-        icon='mdi:knob',
-        brightness_key='knob_brightness',
+        key="knob",
+        name="Eversolo Knob",
+        icon="mdi:knob",
+        brightness_key="knob_brightness",
         set_brightness=lambda coordinator, brightness: coordinator.client.async_set_knob_brightness(
             brightness
         ),
@@ -89,13 +88,23 @@ class EversoloLight(EversoloEntity, LightEntity):
         self._attr_supported_color_modes = {ColorMode.BRIGHTNESS}
         self._attr_color_mode = ColorMode.BRIGHTNESS
         self._attr_unique_id = (
-            f'{coordinator.config_entry.entry_id}_{entity_description.key}'
+            f"{coordinator.config_entry.entry_id}_{entity_description.key}"
         )
 
     @property
     def is_on(self) -> bool:
         """Return true if the Light is on."""
-        return self.coordinator.data.get(self.entity_description.brightness_key, 0) > 0
+        brightness = self.coordinator.data.get(
+            self.entity_description.brightness_key, 0
+        )
+
+        if brightness is None:
+            LOGGER.debug(
+                "Value for key %s is None", self.entity_description.brightness_key
+            )
+            return None
+
+        return brightness > 0
 
     @property
     def brightness(self):
