@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.helpers import config_validation as cv, selector
@@ -13,7 +14,7 @@ from .api import (
     EversoloApiClientCommunicationError,
     EversoloApiClientError,
 )
-from .const import DOMAIN, LOGGER, DEFAULT_PORT
+from .const import DEFAULT_PORT, DOMAIN, LOGGER
 
 
 class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -34,13 +35,13 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             except EversoloApiClientAuthenticationError as exception:
                 LOGGER.warning(exception)
-                _errors['base'] = 'auth'
+                _errors["base"] = "auth"
             except EversoloApiClientCommunicationError as exception:
                 LOGGER.error(exception)
-                _errors['base'] = 'connection'
+                _errors["base"] = "connection"
             except EversoloApiClientError as exception:
                 LOGGER.exception(exception)
-                _errors['base'] = 'unknown'
+                _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
                     title=user_input[CONF_HOST],
@@ -48,7 +49,7 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 )
 
         return self.async_show_form(
-            step_id='user',
+            step_id="user",
             data_schema=vol.Schema(
                 {
                     vol.Required(
