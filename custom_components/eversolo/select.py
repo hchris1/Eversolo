@@ -7,12 +7,12 @@ from typing import Any, Generic, TypeVar
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
 _EversoloDataUpdateCoordinatorT = TypeVar(
-    '_EversoloDataUpdateCoordinatorT', bound=EversoloDataUpdateCoordinator
+    "_EversoloDataUpdateCoordinatorT", bound=EversoloDataUpdateCoordinator
 )
 
 
@@ -36,10 +36,10 @@ class EversoloSelectDescription(
 
 ENTITY_DESCRIPTIONS = [
     EversoloSelectDescription[EversoloDataUpdateCoordinator](
-        key='vu_style',
-        name='Eversolo VU Style',
-        icon='mdi:gauge-low',
-        available_options=['VU-Meter 1', 'VU-Meter 2', 'VU-Meter 3', 'VU-Meter 4'],
+        key="vu_style",
+        name="Eversolo VU Style",
+        icon="mdi:gauge-low",
+        available_options=["VU-Meter 1", "VU-Meter 2", "VU-Meter 3", "VU-Meter 4"],
         select_option=lambda coordinator, option: coordinator.client.async_select_vu_mode_option(
             option
         ),
@@ -73,18 +73,24 @@ class EversoloSelect(EversoloEntity, SelectEntity):
         self.entity_description = entity_description
         self._attr_options = self.entity_description.available_options
         self._attr_unique_id = (
-            f'{coordinator.config_entry.entry_id}_{entity_description.key}'
+            f"{coordinator.config_entry.entry_id}_{entity_description.key}"
         )
 
     @property
     def current_option(self) -> str:
         """Return current VU style."""
-        vu_mode_state = self.coordinator.data.get('vu_mode_state', None)
+        vu_mode_state = self.coordinator.data.get("vu_mode_state", None)
 
         if vu_mode_state is None:
             return None
 
-        return self._attr_options[int(vu_mode_state['currentIndex'])]
+        current_index = int(vu_mode_state.get("currentIndex", -1))
+
+        if current_index < 0 or current_index >= len(self._attr_options):
+            LOGGER.debug("Current index %s is out of range", current_index)
+            return None
+
+        return self._attr_options[current_index]
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""

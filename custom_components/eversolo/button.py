@@ -16,8 +16,9 @@ from .const import DOMAIN
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
+
 _EversoloDataUpdateCoordinatorT = TypeVar(
-    '_EversoloDataUpdateCoordinatorT', bound=EversoloDataUpdateCoordinator
+    "_EversoloDataUpdateCoordinatorT", bound=EversoloDataUpdateCoordinator
 )
 
 
@@ -38,30 +39,30 @@ class EversoloButtonDescription(
 
 ENTITY_DESCRIPTIONS = [
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
-        key='reboot',
-        name='Eversolo Reboot',
+        key="reboot",
+        name="Eversolo Reboot",
         device_class=ButtonDeviceClass.RESTART,
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_reboot(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
-        key='power_off',
-        name='Eversolo Power Off',
-        icon='mdi:power-off',
+        key="power_off",
+        name="Eversolo Power Off",
+        icon="mdi:power-off",
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_power_off(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
-        key='toggle_screen_on_off',
-        name='Eversolo Toggle Screen On/Off',
-        icon='mdi:tablet',
+        key="toggle_screen_on_off",
+        name="Eversolo Toggle Screen On/Off",
+        icon="mdi:tablet",
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_toggle_screen(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
-        key='cycle_screen_mode',
-        name='Eversolo Cycle Screen Mode',
-        icon='mdi:page-next',
+        key="cycle_screen_mode",
+        name="Eversolo Cycle Screen Mode",
+        icon="mdi:page-next",
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(),
     ),
@@ -92,7 +93,9 @@ class EversoloButton(EversoloEntity, ButtonEntity):
         """Initialize Eversolo button."""
         super().__init__(coordinator)
         self.entity_description = entity_description
-        self._attr_unique_id = f'{coordinator.config_entry.entry_id}_{entity_description.key}'
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_{entity_description.key}"
+        )
 
     async def async_press(self) -> None:
         """Triggers the Eversolo button press service."""
