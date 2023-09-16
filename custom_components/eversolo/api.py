@@ -106,16 +106,15 @@ class EversoloApiClient:
             LOGGER.debug('Key "currentValue" not found in response')
             return None
 
-        # Max value for brightness is 115
-        return round(current_value * (255 / 115))
+        # Max value for brightness is 255
+        return round(current_value)
 
     async def async_set_knob_brightness(self, value) -> any:
         """Set the knob brightness to a value in range 0..255."""
-        # Max value for brightness is 115
-        brightness = round(value * (115 / 255))
+        # Max value for brightness is 255
         return await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setKnobBrightness?index={brightness}",
+            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setKnobBrightness?index={value}",
             parseJson=False,
         )
 
