@@ -246,9 +246,13 @@ class EversoloApiClient:
             parseJson=False,
         )
 
-    def create_internal_image_url(self, song_id) -> any:
+    def create_image_url_by_song_id(self, song_id) -> any:
         """Create url to fetch album covers when using the internal player."""
         return f"http://{self._host}:{self._port}/ZidooMusicControl/v2/getImage?id={song_id}&target=16"
+
+    def create_image_url_by_path(self, path) -> any:
+        """Create url to fetch album covers when using AirPlay by concatting the path."""
+        return f"http://{self._host}:{self._port}{path}"
 
     async def _api_wrapper(
         self,

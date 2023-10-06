@@ -226,20 +226,23 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
         # Bluetooth or Spotify Connect
         if play_type == 6:
-            album_url = (
-                music_control_state.get("everSoloPlayInfo", {})
-                .get("everSoloPlayAudioInfo", {})
-                .get("albumUrl", None)
+            album_url = music_control_state.get("everSoloPlayInfo", {}).get(
+                "icon", None
             )
 
-            if album_url is not None:
-                return album_url
+            if album_url is None or album_url == "":
+                return None
+
+            if not album_url.startswith("http"):
+                album_url = self.coordinator.client.create_image_url_by_path(album_url)
+
+            return album_url
 
         # Internal Player
         if play_type == 5:
             song_id = music_control_state.get("playingMusic", {}).get("id", None)
             if song_id is not None:
-                return self.coordinator.client.create_internal_image_url(song_id)
+                return self.coordinator.client.create_image_url_by_song_id(song_id)
 
         return None
 
