@@ -27,14 +27,6 @@ SUPPORT_FEATURES = (
     | MediaPlayerEntityFeature.SEEK
 )
 
-AVAILABLE_SOURCES = {
-    "XMOS": "Internal Player",
-    "BT": "Bluetooth",
-    "USB": "USB-C",
-    "SPDIF": "SPDIF",
-    "RCA": "Coaxial",
-}
-
 
 async def async_setup_entry(hass, entry, async_add_devices):
     """Set up the Media Player platform."""
@@ -130,17 +122,32 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         if input_output_state is None:
             return None
 
+        sources = self.coordinator.data.get("input_output_state", {}).get(
+            "transformed_sources", None
+        )
+
+        if sources is None:
+            return None
+
         input_index = input_output_state.get("inputIndex", -1)
-        if input_index < 0 or input_index >= len(AVAILABLE_SOURCES):
+        if input_index < 0 or input_index >= len(sources):
             LOGGER.debug("Input index %s is out of range", input_index)
             return None
 
-        return list(AVAILABLE_SOURCES.values())[input_index]
+        return list(sources.values())[input_index]
 
     @property
     def source_list(self):
         """List of available input sources."""
-        return list(AVAILABLE_SOURCES.values())
+        # NoneType object has no values
+        sources = self.coordinator.data.get("input_output_state", {}).get(
+            "transformed_sources", None
+        )
+
+        if sources is None:
+            return None
+
+        return list(sources.values())
 
     @property
     def media_title(self):
@@ -316,12 +323,18 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     async def async_select_source(self, source):
         """Set the input source."""
-        index = 0
-        for key, value in AVAILABLE_SOURCES.items():
-            if value == source:
-                await self.coordinator.client.async_set_input(index, key)
-                break
-            index += 1
+        sources = self.coordinator.data.get("input_output_state", {}).get(
+            "transformed_sources", None
+        )
+
+        if sources is None:
+            return
+
+        index, tag = next(
+            (index, key) for index, key in enumerate(sources) if sources[key] == source
+        )
+
+        await self.coordinator.client.async_set_input(index, tag)
 
     async def async_media_play_pause(self):
         """Simulate play pause Media Player."""

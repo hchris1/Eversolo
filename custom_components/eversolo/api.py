@@ -43,6 +43,12 @@ class EversoloApiClient:
             "knob_brightness": await self.async_get_knob_brightness(),
             "music_control_state": await self.async_get_music_control_state(),
             "vu_mode_state": await self.async_get_vu_mode_state(),
+            "vu_mode_options": {
+                "VU-Meter 1": "VU-Meter 1",
+                "VU-Meter 2": "VU-Meter 2",
+                "VU-Meter 3": "VU-Meter 3",
+                "VU-Meter 4": "VU-Meter 4",
+            },
         }
         LOGGER.debug("Fetched data from API: %s", result)
         return result
@@ -55,12 +61,44 @@ class EversoloApiClient:
         )
         return result
 
+    def transform_sources(self, input_output_state: dict) -> dict:
+        """Return available input sources."""
+        sources = input_output_state.get("inputData", None)
+
+        if sources is None:
+            return None
+
+        transformed_sources = {}
+
+        for source in list(sources):
+            transformed_sources[source["tag"].replace("/", "")] = source["name"]
+
+        return transformed_sources
+
+    def transform_outputs(self, input_output_state: dict) -> dict:
+        """Return available input sources."""
+        outputs = input_output_state.get("outputData", None)
+
+        if outputs is None:
+            return None
+
+        transformed_sources = {}
+
+        for source in [output for output in outputs if output["enable"]]:
+            transformed_sources[source["tag"].replace("/", "")] = source["name"]
+
+        return transformed_sources
+
     async def async_get_input_output_state(self):
         """Return input/output state."""
         result = await self._api_wrapper(
             method="get",
             url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/getInputAndOutputList",
         )
+
+        result["transformed_sources"] = self.transform_sources(result)
+        result["transformed_outputs"] = self.transform_outputs(result)
+
         return result
 
     async def async_get_vu_mode_state(self):
@@ -150,7 +188,7 @@ class EversoloApiClient:
             parseJson=False,
         )
 
-    async def async_select_vu_mode_option(self, index) -> any:
+    async def async_select_vu_mode_option(self, index, tag) -> any:
         """Select the VU meter style."""
         await self._api_wrapper(
             method="get",
