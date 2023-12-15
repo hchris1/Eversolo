@@ -26,6 +26,7 @@ It provides the following entities:
 | Light         | Display                    | Controls display brightness                                                   |
 | Light         | Knob                       | Controls knob brightness                                                      |
 | Media Player  | Eversolo                   | Media controls                                                                |
+| Select        | Output Mode                | Selects between available outputs                                             |
 | Select        | VU Style                   | Selects between the 4 available VU styles                                     |
 | Sensor        | Version                    | Provides firmware version                                                     |
 
