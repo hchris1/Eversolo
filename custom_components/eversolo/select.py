@@ -53,7 +53,7 @@ ENTITY_DESCRIPTIONS = [
     EversoloSelectDescription[EversoloDataUpdateCoordinator](
         key="output_mode",
         name="Eversolo Output Mode",
-        icon="mdi:transmission-tower",
+        icon="mdi:export",
         get_selected_option=lambda coordinator: coordinator.data.get(
             "input_output_state", {}
         ).get("outputIndex", -1),
