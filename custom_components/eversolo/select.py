@@ -20,9 +20,10 @@ _EversoloDataUpdateCoordinatorT = TypeVar(
 class EversoloSelectDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
     """Mixin to describe a Select entity."""
 
-    available_options: list[str]
+    get_selected_option: Callable[[_EversoloDataUpdateCoordinatorT], int]
+    get_available_options: Callable[[_EversoloDataUpdateCoordinatorT], list[str]]
     select_option: Callable[
-        [_EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]
+        [_EversoloDataUpdateCoordinatorT, int, str], Coroutine[Any, Any, None]
     ]
 
 
@@ -39,11 +40,30 @@ ENTITY_DESCRIPTIONS = [
         key="vu_style",
         name="Eversolo VU Style",
         icon="mdi:gauge-low",
-        available_options=["VU-Meter 1", "VU-Meter 2", "VU-Meter 3", "VU-Meter 4"],
-        select_option=lambda coordinator, option: coordinator.client.async_select_vu_mode_option(
-            option
+        get_selected_option=lambda coordinator: coordinator.data.get(
+            "vu_mode_state", {}
+        ).get("currentIndex", -1),
+        get_available_options=lambda coordinator: coordinator.data.get(
+            "vu_mode_options", []
         ),
-    )
+        select_option=lambda coordinator, index, tag: coordinator.client.async_select_vu_mode_option(
+            index, tag
+        ),
+    ),
+    EversoloSelectDescription[EversoloDataUpdateCoordinator](
+        key="output_mode",
+        name="Eversolo Output Mode",
+        icon="mdi:transmission-tower",
+        get_selected_option=lambda coordinator: coordinator.data.get(
+            "input_output_state", {}
+        ).get("outputIndex", -1),
+        get_available_options=lambda coordinator: coordinator.data.get(
+            "input_output_state", {}
+        ).get("transformed_outputs", None),
+        select_option=lambda coordinator, index, tag: coordinator.client.async_set_output(
+            index, tag
+        ),
+    ),
 ]
 
 
@@ -71,31 +91,48 @@ class EversoloSelect(EversoloEntity, SelectEntity):
         """Initialize the Select class."""
         super().__init__(coordinator)
         self.entity_description = entity_description
-        self._attr_options = self.entity_description.available_options
         self._attr_unique_id = (
             f"{coordinator.config_entry.entry_id}_{entity_description.key}"
         )
 
     @property
-    def current_option(self) -> str:
-        """Return current VU style."""
-        vu_mode_state = self.coordinator.data.get("vu_mode_state", None)
+    def options(self) -> list[str]:
+        """Return the list of available options."""
+        return list(
+            self.entity_description.get_available_options(self.coordinator).values()
+        )
 
-        if vu_mode_state is None:
+    @property
+    def current_option(self) -> str:
+        """Return current state."""
+        current_index = self.entity_description.get_selected_option(self.coordinator)
+
+        options = self.entity_description.get_available_options(self.coordinator)
+
+        if options is None:
+            LOGGER.debug("No options found")
             return None
 
-        current_index = int(vu_mode_state.get("currentIndex", -1))
-
-        if current_index < 0 or current_index >= len(self._attr_options):
+        if current_index < 0 or current_index >= len(options):
             LOGGER.debug("Current index %s is out of range", current_index)
             return None
 
-        return self._attr_options[current_index]
+        return list(options.values())[current_index]
 
     async def async_select_option(self, option: str) -> None:
-        """Change the selected option."""
+        """Change to selected option."""
 
-        await self.entity_description.select_option(
-            self.coordinator, self.entity_description.available_options.index(option)
-        )
+        options = self.entity_description.get_available_options(self.coordinator)
+
+        index, tag = None, None
+        for i, (key, value) in enumerate(options.items()):
+            if value == option:
+                index, tag = i, key
+                break
+
+        if index is None or tag is None:
+            LOGGER.debug("Option %s not found", option)
+            return
+
+        await self.entity_description.select_option(self.coordinator, index, tag)
         self._attr_current_option = option
