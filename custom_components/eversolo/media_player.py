@@ -330,9 +330,14 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         if sources is None:
             return
 
-        index, tag = next(
-            (index, key) for index, key in enumerate(sources) if sources[key] == source
-        )
+        try:
+            index, tag = next(
+                (index, key)
+                for index, key in enumerate(sources)
+                if sources[key] == source or key == source
+            )
+        except StopIteration:
+            raise ValueError(f"Source {source} not found")
 
         await self.coordinator.client.async_set_input(index, tag)
 
