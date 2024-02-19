@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import aiohttp
 import async_timeout
-import asyncio
 import socket
 
 from .const import LOGGER
@@ -319,7 +318,7 @@ class EversoloApiClient:
                 else:
                     return await response.read()
 
-        except asyncio.TimeoutError as exception:
+        except TimeoutError as exception:
             raise EversoloApiClientCommunicationError(
                 "Timeout error fetching information",
             ) from exception
