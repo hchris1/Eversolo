@@ -21,7 +21,7 @@ class EversoloSelectDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
     """Mixin to describe a Select entity."""
 
     get_selected_option: Callable[[_EversoloDataUpdateCoordinatorT], int]
-    get_available_options: Callable[[_EversoloDataUpdateCoordinatorT], list[str]]
+    get_available_options: Callable[[_EversoloDataUpdateCoordinatorT], list[dict]]
     select_option: Callable[
         [_EversoloDataUpdateCoordinatorT, int, str], Coroutine[Any, Any, None]
     ]
@@ -44,9 +44,23 @@ ENTITY_DESCRIPTIONS = [
             "vu_mode_state", {}
         ).get("currentIndex", -1),
         get_available_options=lambda coordinator: coordinator.data.get(
-            "vu_mode_options", []
-        ),
+            "vu_mode_state", {}
+        ).get("data", None),
         select_option=lambda coordinator, index, tag: coordinator.client.async_select_vu_mode_option(
+            index, tag
+        ),
+    ),
+    EversoloSelectDescription[EversoloDataUpdateCoordinator](
+        key="spectrum_style",
+        name="Eversolo Spectrum Style",
+        icon="mdi:chart-histogram",
+        get_selected_option=lambda coordinator: coordinator.data.get(
+            "spectrum_mode_state", {}
+        ).get("currentIndex", -1),
+        get_available_options=lambda coordinator: coordinator.data.get(
+            "spectrum_mode_state", {}
+        ).get("data", None),
+        select_option=lambda coordinator, index, tag: coordinator.client.async_select_spectrum_mode_option(
             index, tag
         ),
     ),
@@ -98,36 +112,38 @@ class EversoloSelect(EversoloEntity, SelectEntity):
     @property
     def options(self) -> list[str]:
         """Return the list of available options."""
-        return list(
-            self.entity_description.get_available_options(self.coordinator).values()
-        )
+        options = self.entity_description.get_available_options(self.coordinator)
+
+        if options is None:
+            LOGGER.debug("No options found")
+            return []
+
+        return [options[i].get("title", "") for i in range(len(options))]
 
     @property
     def current_option(self) -> str:
         """Return current state."""
         current_index = self.entity_description.get_selected_option(self.coordinator)
 
-        options = self.entity_description.get_available_options(self.coordinator)
-
-        if options is None:
-            LOGGER.debug("No options found")
-            return None
-
-        if current_index < 0 or current_index >= len(options):
+        if current_index < 0 or current_index >= len(self.options):
             LOGGER.debug("Current index %s is out of range", current_index)
             return None
 
-        return list(options.values())[current_index]
+        return list(self.options)[current_index]
 
     async def async_select_option(self, option: str) -> None:
         """Change to selected option."""
 
         options = self.entity_description.get_available_options(self.coordinator)
 
+        if options is None:
+            LOGGER.error("No options found")
+            return
+
         index, tag = None, None
-        for i, (key, value) in enumerate(options.items()):
-            if value == option:
-                index, tag = i, key
+        for i, value in enumerate(options):
+            if option == value.get("title", None):
+                index, tag = i, value.get("tag", "")
                 break
 
         if index is None or tag is None:

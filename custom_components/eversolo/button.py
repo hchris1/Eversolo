@@ -66,6 +66,13 @@ ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(),
     ),
+    EversoloButtonDescription[EversoloDataUpdateCoordinator](
+        key="cycle_screen_mode_spectrum",
+        name="Eversolo Cycle Screen Mode (Spectrum)",
+        icon="mdi:page-next",
+        entity_category=EntityCategory.CONFIG,
+        press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(should_show_spectrum=True),
+    ),
 ]
 
 

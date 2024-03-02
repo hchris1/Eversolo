@@ -42,12 +42,7 @@ class EversoloApiClient:
             "knob_brightness": await self.async_get_knob_brightness(),
             "music_control_state": await self.async_get_music_control_state(),
             "vu_mode_state": await self.async_get_vu_mode_state(),
-            "vu_mode_options": {
-                "VU-Meter 1": "VU-Meter 1",
-                "VU-Meter 2": "VU-Meter 2",
-                "VU-Meter 3": "VU-Meter 3",
-                "VU-Meter 4": "VU-Meter 4",
-            },
+            "spectrum_mode_state": await self.async_get_spectrum_state(),
         }
         LOGGER.debug("Fetched data from API: %s", result)
         return result
@@ -74,17 +69,25 @@ class EversoloApiClient:
 
         return transformed_sources
 
-    def transform_outputs(self, input_output_state: dict) -> dict:
+    def transform_outputs(self, input_output_state: dict) -> list:
         """Return available input sources."""
         outputs = input_output_state.get("outputData", None)
 
         if outputs is None:
             return None
 
-        transformed_sources = {}
+        # Write data property to transformed_sources with an entry with index and title each
+        transformed_sources = []
 
-        for source in [output for output in outputs if output["enable"]]:
-            transformed_sources[source["tag"].replace("/", "")] = source["name"]
+        enabled_outputs = list(filter(lambda output: output["enable"] == 1, outputs))
+
+        for source, index in zip(enabled_outputs, range(len(enabled_outputs))):
+            transformed_sources.append({
+                "index": index,
+                "title": source["name"],
+                "tag": source["tag"].replace("/", "")
+            })
+
 
         return transformed_sources
 
@@ -105,6 +108,14 @@ class EversoloApiClient:
         result = await self._api_wrapper(
             method="get",
             url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/getVUModeList",
+        )
+        return result
+
+    async def async_get_spectrum_state(self):
+        """Return spectrum state."""
+        result = await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/getSpPlayModeList",
         )
         return result
 
@@ -179,11 +190,11 @@ class EversoloApiClient:
             parseJson=False,
         )
 
-    async def async_trigger_cycle_screen_mode(self) -> any:
+    async def async_trigger_cycle_screen_mode(self, should_show_spectrum = False) -> any:
         """Goes to the next screen."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/changVUDisplay",
+            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/changVUDisplay?openType={int(should_show_spectrum)}",
             parseJson=False,
         )
 
@@ -192,6 +203,14 @@ class EversoloApiClient:
         await self._api_wrapper(
             method="get",
             url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setVUMode?index={index}",
+            parseJson=False,
+        )
+
+    async def async_select_spectrum_mode_option(self, index, tag) -> any:
+        """Select the spectrum style."""
+        await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setSpPlayModeList?index={index}",
             parseJson=False,
         )
 
