@@ -13,22 +13,24 @@ _Integration for [Eversolo Digital Streamers](https://www.eversolo.com/)._
 
 ## Description
 
-This custom component integrates Eversolo Digital Streamers into [Home Assistant](https://www.home-assistant.io/). 
+This custom component integrates Eversolo Digital Streamers into [Home Assistant](https://www.home-assistant.io/).
 
 It provides the following entities:
 
-| Platform      | Name                       | Description                                                                   |
-|---------------|----------------------------|-------------------------------------------------------------------------------|
-| Button        | Cycle Screen Mode          | Goes to next screen mode (menu, song info, VU meter with info, VU meter only) |
-| Button        | Power Off                  | Turns off device                                                              |
-| Button        | Reboot                     | Reboots device                                                                |
-| Button        | Toggle Screen On/Off       | Turns display on/off                                                          |
-| Light         | Display                    | Controls display brightness                                                   |
-| Light         | Knob                       | Controls knob brightness                                                      |
-| Media Player  | Eversolo                   | Media controls                                                                |
-| Select        | Output Mode                | Selects between available outputs                                             |
-| Select        | VU Style                   | Selects between the 4 available VU styles                                     |
-| Sensor        | Version                    | Provides firmware version                                                     |
+| Platform      | Name                         | Description                                                                   |
+|---------------|------------------------------|-------------------------------------------------------------------------------|
+| Button        | Cycle Screen Mode            | Goes to next screen mode (menu, song info, VU meter with info, VU meter only) |
+| Button        | Cycle Screen Mode (Spectrum) | Same as Cycle Screen Mode with spectrum instead of VU                         |
+| Button        | Power Off                    | Turns off device                                                              |
+| Button        | Reboot                       | Reboots device                                                                |
+| Button        | Toggle Screen On/Off         | Turns display on/off                                                          |
+| Light         | Display                      | Controls display brightness                                                   |
+| Light         | Knob                         | Controls knob brightness                                                      |
+| Media Player  | Eversolo                     | Media controls                                                                |
+| Select        | Output Mode                  | Selects between available outputs                                             |
+| Select        | VU Style                     | Selects between the 4 available VU styles                                     |
+| Select        | Spectrum Style               | Selects between the 4 available Specrum styles                                |
+| Sensor        | Version                      | Provides firmware version                                                     |
 
 > [!IMPORTANT]
 > This integration is only tested on the **Eversolo DMP-A6**. Tests and contributions to verify and support more Eversolo devices are welcome!
