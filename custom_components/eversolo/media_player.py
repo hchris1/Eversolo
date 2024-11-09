@@ -43,7 +43,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         super().__init__(coordinator)
         self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
         self._attr_supported_features = SUPPORT_FEATURES
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_media_player"
+        self._attr_unique_id = f"{
+            coordinator.config_entry.entry_id}_media_player"
         self._config_entry = config_entry
         self._name = "Eversolo"
         self._state = None
@@ -56,7 +57,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def state(self):
         """Return Media Player state."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             self._state = None
@@ -85,7 +87,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def volume_level(self):
         """Volume level of the Media Player in range 0..1."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -93,7 +96,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         current_volume = music_control_state.get("volumeData", {}).get(
             "currenttVolume", None
         )
-        max_volume = music_control_state.get("volumeData", {}).get("maxVolume", None)
+        max_volume = music_control_state.get(
+            "volumeData", {}).get("maxVolume", None)
 
         if current_volume is None or max_volume is None:
             LOGGER.debug(
@@ -107,7 +111,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def is_volume_muted(self):
         """Return muted state."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -117,7 +122,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def source(self):
         """Return the current input source."""
-        input_output_state = self.coordinator.data.get("input_output_state", None)
+        input_output_state = self.coordinator.data.get(
+            "input_output_state", None)
 
         if input_output_state is None:
             return None
@@ -152,7 +158,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_title(self):
         """Title of current playing media."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -176,7 +183,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_artist(self):
         """Artist of current playing media."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -200,7 +208,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_album_name(self):
         """Album of current playing media."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -224,7 +233,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_image_url(self):
         """Image url of current playing media."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -241,13 +251,21 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
                 return None
 
             if not album_url.startswith("http"):
-                album_url = self.coordinator.client.create_image_url_by_path(album_url)
+                album_url = self.coordinator.client.create_image_url_by_path(
+                    album_url)
 
             return album_url
 
         # Internal Player
         if play_type == 5:
-            song_id = music_control_state.get("playingMusic", {}).get("id", None)
+            album_art = music_control_state.get(
+                "playingMusic", {}).get("albumArt", None)
+
+            if album_art:
+                return album_art
+
+            song_id = music_control_state.get(
+                "playingMusic", {}).get("id", None)
             if song_id is not None:
                 return self.coordinator.client.create_image_url_by_song_id(song_id)
 
@@ -256,7 +274,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_duration(self):
         """Duration of current playing media in seconds."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -271,7 +290,8 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def media_position(self):
         """Position of current playing media in seconds."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return None
@@ -295,13 +315,15 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     async def async_set_volume_level(self, volume: float) -> None:
         """Set volume level, range 0..1."""
-        music_control_state = self.coordinator.data.get("music_control_state", None)
+        music_control_state = self.coordinator.data.get(
+            "music_control_state", None)
 
         if music_control_state is None:
             return
 
         converted_volume = round(
-            volume * int(music_control_state.get("volumeData", {}).get("maxVolume", 0))
+            volume * int(music_control_state.get("volumeData",
+                         {}).get("maxVolume", 0))
         )
         await self.coordinator.client.async_set_volume(converted_volume)
         await self.coordinator.async_request_refresh()
