@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from homeassistant.components.light import (
     LightEntity,
@@ -27,8 +27,14 @@ class EversoloLightDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
 
     brightness_key: str
     set_brightness: Callable[
-        [_EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]
+        [_EversoloDataUpdateCoordinatorT, int], Coroutine[Any, Any, None]
     ]
+    key: str
+    name: str
+    icon: str
+    is_light_on_key: Optional[str] = None
+    toggle_on_off: Optional[Callable[[
+        _EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]]] = None
 
 
 @dataclass
@@ -48,6 +54,8 @@ ENTITY_DESCRIPTIONS = [
         set_brightness=lambda coordinator, brightness: coordinator.client.async_set_display_brightness(
             brightness
         ),
+        is_light_on_key="is_display_on",
+        toggle_on_off=lambda coordinator: coordinator.client.async_trigger_toggle_screen(),
     ),
     EversoloLightDescription[EversoloDataUpdateCoordinator](
         key="knob",
@@ -90,10 +98,16 @@ class EversoloLight(EversoloEntity, LightEntity):
         self._attr_unique_id = (
             f"{coordinator.config_entry.entry_id}_{entity_description.key}"
         )
+        self.last_brightness = None
 
     @property
     def is_on(self) -> bool:
         """Return true if the Light is on."""
+        if self.entity_description.is_light_on_key is not None:
+            return self.coordinator.data.get(
+                self.entity_description.is_light_on_key, False
+            )
+
         brightness = self.coordinator.data.get(
             self.entity_description.brightness_key, 0
         )
@@ -113,11 +127,27 @@ class EversoloLight(EversoloEntity, LightEntity):
 
     async def async_turn_on(self, **kwargs: any) -> None:
         """Turn on the Light."""
+        has_attr_brightness = ATTR_BRIGHTNESS in kwargs
+
+        if not has_attr_brightness:
+            if self.entity_description.toggle_on_off is not None:
+                await self.entity_description.toggle_on_off(self.coordinator)
+            else:
+                brightness = self.last_brightness if self.last_brightness is not None else 255
+                await self.entity_description.set_brightness(self.coordinator, brightness)
+            await self.coordinator.async_request_refresh()
+            return
+
         brightness = kwargs.get(ATTR_BRIGHTNESS, 255)
+        self.last_brightness = brightness
         await self.entity_description.set_brightness(self.coordinator, brightness)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **_: any) -> None:
         """Turn off the Light."""
-        await self.entity_description.set_brightness(self.coordinator, 0)
+        if self.entity_description.toggle_on_off is not None:
+            await self.entity_description.toggle_on_off(self.coordinator)
+        else:
+            await self.entity_description.set_brightness(self.coordinator, 0)
+
         await self.coordinator.async_request_refresh()
