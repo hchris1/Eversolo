@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from homeassistant.components.light import (
     LightEntity,
@@ -32,9 +32,9 @@ class EversoloLightDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
     key: str
     name: str
     icon: str
-    is_light_on_key: Optional[str] = None
-    toggle_on_off: Optional[Callable[[
-        _EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]]] = None
+    is_light_on_key: str | None = None
+    toggle_on_off: Callable[[
+        _EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]] | None = None
 
 
 @dataclass
