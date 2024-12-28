@@ -132,6 +132,7 @@ class EversoloLight(EversoloEntity, LightEntity):
         if not has_attr_brightness:
             if self.entity_description.toggle_on_off is not None and not self.is_on:
                 await self.entity_description.toggle_on_off(self.coordinator)
+            elif self.entity_description.toggle_on_off is None:
                 brightness = self.last_brightness if self.last_brightness is not None else 255
                 await self.entity_description.set_brightness(self.coordinator, brightness)
             await self.coordinator.async_request_refresh()
