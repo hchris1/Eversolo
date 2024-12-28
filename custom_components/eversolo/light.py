@@ -130,9 +130,8 @@ class EversoloLight(EversoloEntity, LightEntity):
         has_attr_brightness = ATTR_BRIGHTNESS in kwargs
 
         if not has_attr_brightness:
-            if self.entity_description.toggle_on_off is not None:
+            if self.entity_description.toggle_on_off is not None and not self.is_on:
                 await self.entity_description.toggle_on_off(self.coordinator)
-            else:
                 brightness = self.last_brightness if self.last_brightness is not None else 255
                 await self.entity_description.set_brightness(self.coordinator, brightness)
             await self.coordinator.async_request_refresh()
@@ -145,9 +144,9 @@ class EversoloLight(EversoloEntity, LightEntity):
 
     async def async_turn_off(self, **_: any) -> None:
         """Turn off the Light."""
-        if self.entity_description.toggle_on_off is not None:
+        if self.entity_description.toggle_on_off is not None and self.is_on:
             await self.entity_description.toggle_on_off(self.coordinator)
-        else:
+        elif self.entity_description.toggle_on_off is None:
             await self.entity_description.set_brightness(self.coordinator, 0)
 
         await self.coordinator.async_request_refresh()
