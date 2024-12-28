@@ -43,6 +43,7 @@ class EversoloApiClient:
             "music_control_state": await self.async_get_music_control_state(),
             "vu_mode_state": await self.async_get_vu_mode_state(),
             "spectrum_mode_state": await self.async_get_spectrum_state(),
+            "is_display_on": await self.async_get_display_state(),
         }
         LOGGER.debug("Fetched data from API: %s", result)
         return result
@@ -65,7 +66,8 @@ class EversoloApiClient:
         transformed_sources = {}
 
         for source in list(sources):
-            transformed_sources[source["tag"].replace("/", "")] = source["name"]
+            transformed_sources[source["tag"].replace(
+                "/", "")] = source["name"]
 
         return transformed_sources
 
@@ -79,7 +81,8 @@ class EversoloApiClient:
         # Write data property to transformed_sources with an entry with index and title each
         transformed_sources = []
 
-        enabled_outputs = list(filter(lambda output: output["enable"] == 1, outputs))
+        enabled_outputs = list(
+            filter(lambda output: output["enable"] == 1, outputs))
 
         for source, index in zip(enabled_outputs, range(len(enabled_outputs))):
             transformed_sources.append({
@@ -87,7 +90,6 @@ class EversoloApiClient:
                 "title": source["name"],
                 "tag": source["tag"].replace("/", "")
             })
-
 
         return transformed_sources
 
@@ -115,15 +117,46 @@ class EversoloApiClient:
         """Return spectrum state."""
         result = await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/getSpPlayModeList",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/getSpPlayModeList",
         )
         return result
 
-    async def async_get_display_brightness(self) -> any:
+    async def async_get_display_state(self):
+        """Return power options."""
+        result = await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{
+                self._port}/ZidooMusicControl/v2/getPowerOption",
+        )
+
+        return self.extract_is_screen_on(result)
+
+    def extract_is_screen_on(self, power_options: dict):
+        """Add is_screen_on property to power options."""
+        # This is a hack to determine if the screen is on or off
+        # When a screen is on, the following keywords are present in the screen option depending on the language
+        keywords = ["Screen off", "å…³é—­å±å¹•", "é—œé–‰å±å¹•", "Bildschirm aus",
+                    "Ecran Ã©teint", "Tela desligada", "ç”»é¢ã‚’ã‚ªãƒ•ã«ã™ã‚‹"]
+
+        screen_option = next(
+            (item for item in power_options["data"] if item["tag"] == "screen"), None)
+
+        if screen_option is None:
+            LOGGER.debug('Key "screen" not found in power options')
+            return None
+
+        result = any(
+            keyword.lower() in screen_option["name"].lower() for keyword in keywords)
+
+        return result
+
+    async def async_get_display_brightness(self):
         """Return the display brightness in range 0..255."""
         result = await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/getScreenBrightness",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/getScreenBrightness",
         )
         current_value = result.get("currentValue", None)
         if current_value is None:
@@ -139,7 +172,8 @@ class EversoloApiClient:
         brightness = round(value * (115 / 255))
         return await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setScreenBrightness?index={brightness}",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/setScreenBrightness?index={brightness}",
             parseJson=False,
         )
 
@@ -147,7 +181,8 @@ class EversoloApiClient:
         """Return the knob brightness in range 0..255."""
         result = await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/getKnobBrightness",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/getKnobBrightness",
         )
         current_value = result.get("currentValue", None)
         if current_value is None:
@@ -162,7 +197,8 @@ class EversoloApiClient:
         # Max value for brightness is 255
         return await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setKnobBrightness?index={value}",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/setKnobBrightness?index={value}",
             parseJson=False,
         )
 
@@ -178,7 +214,8 @@ class EversoloApiClient:
         """Powers off the device."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/setPowerOption?tag=poweroff",
+            url=f"http://{self._host}:{
+                self._port}/ZidooMusicControl/v2/setPowerOption?tag=poweroff",
             parseJson=False,
         )
 
@@ -190,11 +227,12 @@ class EversoloApiClient:
             parseJson=False,
         )
 
-    async def async_trigger_cycle_screen_mode(self, should_show_spectrum = False) -> any:
+    async def async_trigger_cycle_screen_mode(self, should_show_spectrum=False) -> any:
         """Goes to the next screen."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/changVUDisplay?openType={int(should_show_spectrum)}",
+            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/changVUDisplay?openType={
+                int(should_show_spectrum)}",
             parseJson=False,
         )
 
@@ -202,7 +240,8 @@ class EversoloApiClient:
         """Select the VU meter style."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setVUMode?index={index}",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/setVUMode?index={index}",
             parseJson=False,
         )
 
@@ -210,7 +249,8 @@ class EversoloApiClient:
         """Select the spectrum style."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/SystemSettings/displaySettings/setSpPlayModeList?index={index}",
+            url=f"http://{self._host}:{
+                self._port}/SystemSettings/displaySettings/setSpPlayModeList?index={index}",
             parseJson=False,
         )
 
@@ -234,7 +274,8 @@ class EversoloApiClient:
         """Decreases the volume by one step."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.VolumeDown",
+            url=f"http://{self._host}:{
+                self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.VolumeDown",
             parseJson=False,
         )
 
@@ -242,7 +283,8 @@ class EversoloApiClient:
         """Increases the volume by one step."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.VolumeUp",
+            url=f"http://{self._host}:{
+                self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.VolumeUp",
             parseJson=False,
         )
 
@@ -282,7 +324,8 @@ class EversoloApiClient:
         """Set the volume."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/setDevicesVolume?volume={volume}",
+            url=f"http://{self._host}:{
+                self._port}/ZidooMusicControl/v2/setDevicesVolume?volume={volume}",
             parseJson=False,
         )
 
@@ -290,7 +333,8 @@ class EversoloApiClient:
         """Set the input/source."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/setInputList?tag={tag}&index={index}",
+            url=f"http://{self._host}:{
+                self._port}/ZidooMusicControl/v2/setInputList?tag={tag}&index={index}",
             parseJson=False,
         )
 
@@ -298,7 +342,8 @@ class EversoloApiClient:
         """Set the output."""
         await self._api_wrapper(
             method="get",
-            url=f"http://{self._host}:{self._port}/ZidooMusicControl/v2/setOutInputList?tag={tag}&index={index}",
+            url=f"http://{self._host}:{
+                self._port}/ZidooMusicControl/v2/setOutInputList?tag={tag}&index={index}",
             parseJson=False,
         )
 
