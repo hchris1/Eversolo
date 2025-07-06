@@ -24,6 +24,8 @@ It provides the following entities:
 | Button        | Power Off                    | Turns off device                                                              |
 | Button        | Reboot                       | Reboots device                                                                |
 | Button        | Toggle Screen On/Off         | Turns display on/off                                                          |
+| Button        | Turn Screen On               | Turns display on |
+| Button        | Turn Screen Off              | Turns display off |
 | Light         | Display                      | Controls display brightness                                                   |
 | Light         | Knob                         | Controls knob brightness                                                      |
 | Media Player  | Eversolo                     | Media controls                                                                |
