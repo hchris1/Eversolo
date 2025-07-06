@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 
@@ -17,7 +17,7 @@ _EversoloDataUpdateCoordinatorT = TypeVar(
 
 
 @dataclass
-class EversoloSelectDescriptionMixin(_EversoloDataUpdateCoordinatorT):
+class EversoloSelectDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
     """Mixin to describe a Select entity."""
 
     get_selected_option: Callable[[_EversoloDataUpdateCoordinatorT], int]

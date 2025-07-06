@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from homeassistant.components.button import (
     ButtonDeviceClass,
@@ -23,7 +23,7 @@ _EversoloDataUpdateCoordinatorT = TypeVar(
 
 
 @dataclass
-class EversoloButtonDescriptionMixin(_EversoloDataUpdateCoordinatorT):
+class EversoloButtonDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
     """Mixin to describe a Button entity."""
 
     press_action: Callable[[
