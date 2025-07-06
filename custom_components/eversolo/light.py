@@ -33,8 +33,10 @@ class EversoloLightDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
     name: str
     icon: str
     is_light_on_key: str | None = None
-    toggle_on_off: Callable[[
+    turn_on: Callable[[
         _EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]] | None = None
+    turn_off: Callable[[_EversoloDataUpdateCoordinatorT],
+                       Coroutine[Any, Any, None]] | None = None
 
 
 @dataclass
@@ -55,7 +57,8 @@ ENTITY_DESCRIPTIONS = [
             brightness
         ),
         is_light_on_key="is_display_on",
-        toggle_on_off=lambda coordinator: coordinator.client.async_trigger_toggle_screen(),
+        turn_on=lambda coordinator: coordinator.client.async_trigger_turn_screen_on(),
+        turn_off=lambda coordinator: coordinator.client.async_trigger_turn_screen_off(),
     ),
     EversoloLightDescription[EversoloDataUpdateCoordinator](
         key="knob",
@@ -64,6 +67,9 @@ ENTITY_DESCRIPTIONS = [
         brightness_key="knob_brightness",
         set_brightness=lambda coordinator, brightness: coordinator.client.async_set_knob_brightness(
             brightness
+        ),
+        turn_off=lambda coordinator: coordinator.client.async_set_knob_brightness(
+            0
         ),
     ),
 ]
@@ -130,11 +136,13 @@ class EversoloLight(EversoloEntity, LightEntity):
         has_attr_brightness = ATTR_BRIGHTNESS in kwargs
 
         if not has_attr_brightness:
-            if self.entity_description.toggle_on_off is not None and not self.is_on:
-                await self.entity_description.toggle_on_off(self.coordinator)
-            elif self.entity_description.toggle_on_off is None:
+            if self.entity_description.turn_on is not None:
+                await self.entity_description.turn_on(self.coordinator)
+
+            if self.entity_description.set_brightness is not None:
                 brightness = self.last_brightness if self.last_brightness is not None else 255
                 await self.entity_description.set_brightness(self.coordinator, brightness)
+
             await self.coordinator.async_request_refresh()
             return
 
@@ -145,9 +153,6 @@ class EversoloLight(EversoloEntity, LightEntity):
 
     async def async_turn_off(self, **_: any) -> None:
         """Turn off the Light."""
-        if self.entity_description.toggle_on_off is not None and self.is_on:
-            await self.entity_description.toggle_on_off(self.coordinator)
-        elif self.entity_description.toggle_on_off is None:
-            await self.entity_description.set_brightness(self.coordinator, 0)
-
+        if self.entity_description.turn_off is not None:
+            await self.entity_description.turn_off(self.coordinator)
         await self.coordinator.async_request_refresh()
