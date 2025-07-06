@@ -227,6 +227,22 @@ class EversoloApiClient:
             parseJson=False,
         )
 
+    async def async_trigger_turn_screen_on(self) -> any:
+        """Turn screen on."""
+        await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.Screen.ON",
+            parseJson=False,
+        )
+
+    async def async_trigger_turn_screen_off(self) -> any:
+        """Turn screen off."""
+        await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{self._port}/ZidooControlCenter/RemoteControl/sendkey?key=Key.Screen.OFF",
+            parseJson=False,
+        )
+
     async def async_trigger_cycle_screen_mode(self, should_show_spectrum=False) -> any:
         """Goes to the next screen."""
         await self._api_wrapper(

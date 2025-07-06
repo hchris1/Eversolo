@@ -6,7 +6,7 @@ LOGGER: Logger = getLogger(__package__)
 
 NAME = "Eversolo"
 DOMAIN = "eversolo"
-VERSION = "0.4.1"
+VERSION = "0.5.0"
 ATTRIBUTION = ""
 
 DEFAULT_PORT = 9529
