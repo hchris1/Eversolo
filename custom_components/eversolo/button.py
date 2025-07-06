@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from homeassistant.components.button import (
     ButtonDeviceClass,
@@ -23,10 +23,11 @@ _EversoloDataUpdateCoordinatorT = TypeVar(
 
 
 @dataclass
-class EversoloButtonDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
+class EversoloButtonDescriptionMixin(_EversoloDataUpdateCoordinatorT):
     """Mixin to describe a Button entity."""
 
-    press_action: Callable[[_EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]]
+    press_action: Callable[[
+        _EversoloDataUpdateCoordinatorT], Coroutine[Any, Any, None]]
 
 
 @dataclass
@@ -71,7 +72,8 @@ ENTITY_DESCRIPTIONS = [
         name="Eversolo Cycle Screen Mode (Spectrum)",
         icon="mdi:page-next",
         entity_category=EntityCategory.CONFIG,
-        press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(should_show_spectrum=True),
+        press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(
+            should_show_spectrum=True),
     ),
 ]
 

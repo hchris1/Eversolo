@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from homeassistant.components.light import (
     LightEntity,
@@ -22,7 +22,7 @@ _EversoloDataUpdateCoordinatorT = TypeVar(
 
 
 @dataclass
-class EversoloLightDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
+class EversoloLightDescriptionMixin(_EversoloDataUpdateCoordinatorT):
     """Mixin to describe a Light entity."""
 
     brightness_key: str

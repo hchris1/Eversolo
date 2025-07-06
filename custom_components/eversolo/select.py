@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 
@@ -17,11 +17,12 @@ _EversoloDataUpdateCoordinatorT = TypeVar(
 
 
 @dataclass
-class EversoloSelectDescriptionMixin(Generic[_EversoloDataUpdateCoordinatorT]):
+class EversoloSelectDescriptionMixin(_EversoloDataUpdateCoordinatorT):
     """Mixin to describe a Select entity."""
 
     get_selected_option: Callable[[_EversoloDataUpdateCoordinatorT], int]
-    get_available_options: Callable[[_EversoloDataUpdateCoordinatorT], list[dict]]
+    get_available_options: Callable[[
+        _EversoloDataUpdateCoordinatorT], list[dict]]
     select_option: Callable[
         [_EversoloDataUpdateCoordinatorT, int, str], Coroutine[Any, Any, None]
     ]
@@ -112,7 +113,8 @@ class EversoloSelect(EversoloEntity, SelectEntity):
     @property
     def options(self) -> list[str]:
         """Return the list of available options."""
-        options = self.entity_description.get_available_options(self.coordinator)
+        options = self.entity_description.get_available_options(
+            self.coordinator)
 
         if options is None:
             LOGGER.debug("No options found")
@@ -123,7 +125,8 @@ class EversoloSelect(EversoloEntity, SelectEntity):
     @property
     def current_option(self) -> str:
         """Return current state."""
-        current_index = self.entity_description.get_selected_option(self.coordinator)
+        current_index = self.entity_description.get_selected_option(
+            self.coordinator)
 
         if current_index < 0 or current_index >= len(self.options):
             LOGGER.debug("Current index %s is out of range", current_index)
@@ -134,7 +137,8 @@ class EversoloSelect(EversoloEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         """Change to selected option."""
 
-        options = self.entity_description.get_available_options(self.coordinator)
+        options = self.entity_description.get_available_options(
+            self.coordinator)
 
         if options is None:
             LOGGER.error("No options found")
