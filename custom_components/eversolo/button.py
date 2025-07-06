@@ -56,7 +56,7 @@ ENTITY_DESCRIPTIONS = [
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="toggle_screen_on_off",
         name="Eversolo Toggle Screen On/Off",
-        icon="mdi:tablet",
+        icon="mdi:toggle-switch",
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_toggle_screen(),
     ),
@@ -74,6 +74,20 @@ ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(
             should_show_spectrum=True),
+    ),
+    EversoloButtonDescription[EversoloDataUpdateCoordinator](
+        key="turn_screen_on",
+        name="Eversolo Turn Screen On",
+        icon="mdi:toggle-switch",
+        entity_category=EntityCategory.CONFIG,
+        press_action=lambda coordinator: coordinator.client.async_trigger_turn_screen_on(),
+    ),
+    EversoloButtonDescription[EversoloDataUpdateCoordinator](
+        key="turn_screen_off",
+        name="Eversolo Turn Screen Off",
+        icon="mdi:toggle-switch-off",
+        entity_category=EntityCategory.CONFIG,
+        press_action=lambda coordinator: coordinator.client.async_trigger_turn_screen_off(),
     ),
 ]
 
