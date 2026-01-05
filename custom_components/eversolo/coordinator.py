@@ -53,7 +53,10 @@ class EversoloDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             data = await self.client.async_get_data()
 
-            if CONF_NET_MAC not in self.config_entry.data:
+            if not all(
+                key in self.config_entry.data
+                for key in (CONF_NET_MAC, CONF_MODEL, CONF_FIRMWARE, CONF_ABLE_REMOTE_BOOT)
+            ):
                 await self._async_fetch_and_store_device_info()
 
             return data
