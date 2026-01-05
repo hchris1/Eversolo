@@ -12,7 +12,7 @@ from homeassistant.components.button import (
 )
 from homeassistant.const import EntityCategory
 
-from .const import DOMAIN
+from .const import CONF_ABLE_REMOTE_BOOT, DOMAIN
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
@@ -106,12 +106,16 @@ async def async_setup_entry(hass, entry, async_add_devices):
     """Set up the Button platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
+    # Filter out power_on button if device doesn't support remote boot
+    able_remote_boot = entry.data.get(CONF_ABLE_REMOTE_BOOT, False)
+
     async_add_devices(
         EversoloButton(
             coordinator=coordinator,
             entity_description=entity_description,
         )
         for entity_description in ENTITY_DESCRIPTIONS
+        if entity_description.key != "power_on" or able_remote_boot
     )
 
 
