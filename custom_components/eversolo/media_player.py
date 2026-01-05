@@ -10,12 +10,13 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
 )
 
-from .const import DOMAIN, LOGGER
+from .const import CONF_ABLE_REMOTE_BOOT, DOMAIN, LOGGER
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
 SUPPORT_FEATURES = (
     MediaPlayerEntityFeature.TURN_OFF
+    | MediaPlayerEntityFeature.TURN_ON
     | MediaPlayerEntityFeature.SELECT_SOURCE
     | MediaPlayerEntityFeature.PLAY
     | MediaPlayerEntityFeature.PAUSE
@@ -50,6 +51,14 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         self._state = None
 
     @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        # Entity must remain available to expose WoL turn on functionality
+        if self._config_entry.data.get(CONF_ABLE_REMOTE_BOOT, False):
+            return True
+        return super().available
+
+    @property
     def name(self):
         """Return name."""
         return self._name
@@ -57,12 +66,14 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     @property
     def state(self):
         """Return Media Player state."""
+        if not self.coordinator.last_update_success:
+            return MediaPlayerState.OFF
+
         music_control_state = self.coordinator.data.get(
             "music_control_state", None)
 
         if music_control_state is None:
-            self._state = None
-            return self._state
+            return MediaPlayerState.OFF
 
         state = int(music_control_state.get("state", -1))
 
@@ -312,6 +323,10 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         """Turn off Media Player."""
         await self.coordinator.client.async_trigger_power_off()
         await self.coordinator.async_request_refresh()
+
+    async def async_turn_on(self):
+        """Turn on Media Player via Wake-on-LAN."""
+        await self.coordinator.async_send_wol()
 
     async def async_set_volume_level(self, volume: float) -> None:
         """Set volume level, range 0..1."""
