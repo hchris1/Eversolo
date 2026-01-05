@@ -72,7 +72,7 @@ class EversoloDataUpdateCoordinator(DataUpdateCoordinator):
         """Send Wake-on-LAN magic packet to power on the device."""
         net_mac = self.config_entry.data.get(CONF_NET_MAC)
         if net_mac:
-            LOGGER.error("Sending Wake-on-LAN magic packet to %s", net_mac)
+            LOGGER.info("Sending Wake-on-LAN magic packet to %s", net_mac)
             await self.hass.async_add_executor_job(send_magic_packet, net_mac)
         else:
             LOGGER.warning(
