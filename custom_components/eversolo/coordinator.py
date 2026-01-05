@@ -17,7 +17,15 @@ from .api import (
     EversoloApiClientAuthenticationError,
     EversoloApiClientError,
 )
-from .const import CONF_NET_MAC, DEFAULT_UPDATE_INTERVAL, DOMAIN, LOGGER
+from .const import (
+    CONF_ABLE_REMOTE_BOOT,
+    CONF_FIRMWARE,
+    CONF_MODEL,
+    CONF_NET_MAC,
+    DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+    LOGGER,
+)
 
 
 class EversoloDataUpdateCoordinator(DataUpdateCoordinator):
@@ -46,7 +54,7 @@ class EversoloDataUpdateCoordinator(DataUpdateCoordinator):
             data = await self.client.async_get_data()
 
             if CONF_NET_MAC not in self.config_entry.data:
-                await self._async_fetch_and_store_mac()
+                await self._async_fetch_and_store_device_info()
 
             return data
         except EversoloApiClientAuthenticationError as exception:
@@ -54,19 +62,31 @@ class EversoloDataUpdateCoordinator(DataUpdateCoordinator):
         except EversoloApiClientError as exception:
             raise UpdateFailed(exception) from exception
 
-    async def _async_fetch_and_store_mac(self) -> None:
-        """Fetch and persist MAC address for Wake-on-LAN."""
+    async def _async_fetch_and_store_device_info(self) -> None:
+        """Fetch and persist device info"""
         try:
-            device_model = await self.client.async_get_device_model()
-            net_mac = device_model.get("net_mac")
-            if net_mac:
-                self.hass.config_entries.async_update_entry(
-                    self.config_entry,
-                    data={**self.config_entry.data, CONF_NET_MAC: net_mac},
-                )
+            device_info = await self.client.async_get_device_model()
+            new_data = {**self.config_entry.data}
+
+            if net_mac := device_info.get("net_mac"):
+                new_data[CONF_NET_MAC] = net_mac
                 LOGGER.info("Stored MAC address for Wake-on-LAN: %s", net_mac)
+
+            if model := device_info.get("model"):
+                new_data[CONF_MODEL] = model
+
+            if firmware := device_info.get("firmware"):
+                new_data[CONF_FIRMWARE] = firmware
+
+            if "ableRemoteBoot" in device_info:
+                new_data[CONF_ABLE_REMOTE_BOOT] = device_info["ableRemoteBoot"]
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=new_data,
+            )
         except Exception:
-            LOGGER.debug("Could not fetch MAC address")
+            LOGGER.debug("Could not fetch device info")
 
     async def async_send_wol(self) -> None:
         """Send Wake-on-LAN magic packet to power on the device."""
