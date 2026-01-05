@@ -139,8 +139,13 @@ class EversoloApiClient:
         keywords = ["Screen off", "å…³é—­å±å¹•", "é—œé–‰å±å¹•", "Bildschirm aus",
                     "Ecran Ã©teint", "Tela desligada", "ç”»é¢ã‚’ã‚ªãƒ•ã«ã™ã‚‹"]
 
+        data = power_options.get("data")
+        if data is None:
+            LOGGER.debug('Key "data" not found in power options')
+            return None
+
         screen_option = next(
-            (item for item in power_options["data"] if item["tag"] == "screen"), None)
+            (item for item in data if item["tag"] == "screen"), None)
 
         if screen_option is None:
             LOGGER.debug('Key "screen" not found in power options')
@@ -362,6 +367,14 @@ class EversoloApiClient:
                 self._port}/ZidooMusicControl/v2/setOutInputList?tag={tag}&index={index}",
             parseJson=False,
         )
+
+    async def async_get_device_model(self) -> dict:
+        """Fetch device model info including MAC addresses."""
+        result = await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{self._port}/ControlCenter/getModel",
+        )
+        return result
 
     def create_image_url_by_song_id(self, song_id) -> any:
         """Create url to fetch album covers when using the internal player."""
