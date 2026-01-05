@@ -66,7 +66,7 @@ class EversoloDataUpdateCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(exception) from exception
 
     async def _async_fetch_and_store_device_info(self) -> None:
-        """Fetch and persist device info"""
+        """Fetch and persist device info."""
         try:
             device_info = await self.client.async_get_device_model()
             new_data = {**self.config_entry.data}
