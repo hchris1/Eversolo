@@ -37,6 +37,8 @@ class EversoloButtonDescription(
 ):
     """Class to describe a Button entity."""
 
+    available_when_off: bool = False
+
 
 ENTITY_DESCRIPTIONS = [
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
@@ -52,6 +54,14 @@ ENTITY_DESCRIPTIONS = [
         icon="mdi:power-off",
         entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_power_off(),
+    ),
+    EversoloButtonDescription[EversoloDataUpdateCoordinator](
+        key="power_on",
+        name="Eversolo Power On",
+        icon="mdi:power-on",
+        entity_category=EntityCategory.CONFIG,
+        press_action=lambda coordinator: coordinator.async_send_wol(),
+        available_when_off=True,
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="toggle_screen_on_off",
@@ -119,6 +129,13 @@ class EversoloButton(EversoloEntity, ButtonEntity):
         self._attr_unique_id = (
             f"{coordinator.config_entry.entry_id}_{entity_description.key}"
         )
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        if self.entity_description.available_when_off:
+            return True
+        return super().available
 
     async def async_press(self) -> None:
         """Triggers the Eversolo button press service."""
