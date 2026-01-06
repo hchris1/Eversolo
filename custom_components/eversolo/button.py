@@ -10,8 +10,6 @@ from homeassistant.components.button import (
     ButtonEntity,
     ButtonEntityDescription,
 )
-from homeassistant.const import EntityCategory
-
 from .const import CONF_ABLE_REMOTE_BOOT, DOMAIN
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
@@ -45,21 +43,18 @@ ENTITY_DESCRIPTIONS = [
         key="reboot",
         name="Eversolo Reboot",
         device_class=ButtonDeviceClass.RESTART,
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_reboot(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="power_off",
         name="Eversolo Power Off",
         icon="mdi:power-off",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_power_off(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="power_on",
         name="Eversolo Power On",
         icon="mdi:power-on",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.async_send_wol(),
         available_when_off=True,
     ),
@@ -67,21 +62,18 @@ ENTITY_DESCRIPTIONS = [
         key="toggle_screen_on_off",
         name="Eversolo Toggle Screen On/Off",
         icon="mdi:toggle-switch",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_toggle_screen(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="cycle_screen_mode",
         name="Eversolo Cycle Screen Mode",
         icon="mdi:page-next",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="cycle_screen_mode_spectrum",
         name="Eversolo Cycle Screen Mode (Spectrum)",
         icon="mdi:page-next",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_cycle_screen_mode(
             should_show_spectrum=True),
     ),
@@ -89,14 +81,12 @@ ENTITY_DESCRIPTIONS = [
         key="turn_screen_on",
         name="Eversolo Turn Screen On",
         icon="mdi:toggle-switch",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_turn_screen_on(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="turn_screen_off",
         name="Eversolo Turn Screen Off",
         icon="mdi:toggle-switch-off",
-        entity_category=EntityCategory.CONFIG,
         press_action=lambda coordinator: coordinator.client.async_trigger_turn_screen_off(),
     ),
 ]
