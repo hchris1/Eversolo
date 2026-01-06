@@ -22,17 +22,17 @@ It provides the following entities:
 | Button        | Cycle Screen Mode            | Goes to next screen mode (menu, song info, VU meter with info, VU meter only) |
 | Button        | Cycle Screen Mode (Spectrum) | Same as Cycle Screen Mode with spectrum instead of VU                         |
 | Button        | Power Off                    | Turns off device                                                              |
+| Button        | Power On                     | Turns on device via Wake-on-LAN                                               |
 | Button        | Reboot                       | Reboots device                                                                |
 | Button        | Toggle Screen On/Off         | Turns display on/off                                                          |
-| Button        | Turn Screen On               | Turns display on |
-| Button        | Turn Screen Off              | Turns display off |
+| Button        | Turn Screen Off              | Turns display off                                                             |
+| Button        | Turn Screen On               | Turns display on                                                              |
 | Light         | Display                      | Controls display brightness                                                   |
 | Light         | Knob                         | Controls knob brightness                                                      |
 | Media Player  | Eversolo                     | Media controls                                                                |
 | Select        | Output Mode                  | Selects between available outputs                                             |
+| Select        | Spectrum Style               | Selects between the 4 available Spectrum styles                               |
 | Select        | VU Style                     | Selects between the 4 available VU styles                                     |
-| Select        | Spectrum Style               | Selects between the 4 available Specrum styles                                |
-| Sensor        | Version                      | Provides firmware version                                                     |
 
 > [!IMPORTANT]
 > This integration is only tested on the **Eversolo DMP-A6**. Tests and contributions to verify and support more Eversolo devices are welcome!
