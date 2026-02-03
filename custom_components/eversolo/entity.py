@@ -12,6 +12,7 @@ class EversoloEntity(CoordinatorEntity):
     """EversoloEntity class."""
 
     _attr_attribution = ATTRIBUTION
+    _attr_has_entity_name = True
 
     def __init__(self, coordinator: EversoloDataUpdateCoordinator) -> None:
         """Initialize."""
@@ -19,7 +20,7 @@ class EversoloEntity(CoordinatorEntity):
         self._attr_unique_id = coordinator.config_entry.entry_id
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self.unique_id)},
-            name=NAME,
+            name=coordinator.config_entry.title,
             model=coordinator.config_entry.data.get(CONF_MODEL),
             sw_version=coordinator.config_entry.data.get(CONF_FIRMWARE),
             manufacturer=NAME,
