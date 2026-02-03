@@ -14,7 +14,7 @@ from .api import (
     EversoloApiClientCommunicationError,
     EversoloApiClientError,
 )
-from .const import DEFAULT_PORT, DOMAIN, LOGGER
+from .const import DEFAULT_PORT, DOMAIN, LOGGER, NAME
 
 
 class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -30,7 +30,7 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
         if user_input is not None:
             try:
-                await self._test_credentials(
+                client = await self._test_credentials(
                     host=user_input[CONF_HOST], port=user_input[CONF_PORT]
                 )
             except EversoloApiClientAuthenticationError as exception:
@@ -43,8 +43,14 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.exception(exception)
                 _errors["base"] = "unknown"
             else:
+                try:
+                    device_info = await client.async_get_device_model()
+                    model = device_info.get("model")
+                except Exception:
+                    model = None
+                title = f"{NAME} {model}" if model else NAME
                 return self.async_create_entry(
-                    title=user_input[CONF_HOST],
+                    title=title,
                     data=user_input,
                 )
 
@@ -72,11 +78,12 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=_errors,
         )
 
-    async def _test_credentials(self, host: str, port: int) -> None:
-        """Validate credentials."""
+    async def _test_credentials(self, host: str, port: int) -> EversoloApiClient:
+        """Validate credentials and return the client for reuse."""
         client = EversoloApiClient(
             host=host,
             port=port,
             session=async_create_clientsession(self.hass),
         )
         await client.async_get_data()
+        return client

@@ -50,7 +50,7 @@ class EversoloLightDescription(
 ENTITY_DESCRIPTIONS = [
     EversoloLightDescription[EversoloDataUpdateCoordinator](
         key="display",
-        name="Eversolo Display",
+        name="Display",
         icon="mdi:tablet",
         brightness_key="display_brightness",
         set_brightness=lambda coordinator, brightness: coordinator.client.async_set_display_brightness(
@@ -62,7 +62,7 @@ ENTITY_DESCRIPTIONS = [
     ),
     EversoloLightDescription[EversoloDataUpdateCoordinator](
         key="knob",
-        name="Eversolo Knob",
+        name="Knob",
         icon="mdi:knob",
         brightness_key="knob_brightness",
         set_brightness=lambda coordinator, brightness: coordinator.client.async_set_knob_brightness(

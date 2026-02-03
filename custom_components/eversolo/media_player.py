@@ -47,7 +47,7 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         self._attr_unique_id = f"{
             coordinator.config_entry.entry_id}_media_player"
         self._config_entry = config_entry
-        self._name = "Eversolo"
+        self._attr_name = None
         self._state = None
 
     @property
@@ -57,11 +57,6 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         if self._config_entry.data.get(CONF_ABLE_REMOTE_BOOT, False):
             return True
         return super().available
-
-    @property
-    def name(self):
-        """Return name."""
-        return self._name
 
     @property
     def state(self):
@@ -89,11 +84,6 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
             self._state = None
 
         return self._state
-
-    @property
-    def device_info(self):
-        """Return Media Player device info."""
-        return {}
 
     @property
     def volume_level(self):

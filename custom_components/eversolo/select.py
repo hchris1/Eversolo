@@ -39,7 +39,7 @@ class EversoloSelectDescription(
 ENTITY_DESCRIPTIONS = [
     EversoloSelectDescription[EversoloDataUpdateCoordinator](
         key="vu_style",
-        name="Eversolo VU Style",
+        name="VU Style",
         icon="mdi:gauge-low",
         get_selected_option=lambda coordinator: coordinator.data.get(
             "vu_mode_state", {}
@@ -53,7 +53,7 @@ ENTITY_DESCRIPTIONS = [
     ),
     EversoloSelectDescription[EversoloDataUpdateCoordinator](
         key="spectrum_style",
-        name="Eversolo Spectrum Style",
+        name="Spectrum Style",
         icon="mdi:chart-histogram",
         get_selected_option=lambda coordinator: coordinator.data.get(
             "spectrum_mode_state", {}
@@ -67,7 +67,7 @@ ENTITY_DESCRIPTIONS = [
     ),
     EversoloSelectDescription[EversoloDataUpdateCoordinator](
         key="output_mode",
-        name="Eversolo Output Mode",
+        name="Output Mode",
         icon="mdi:export",
         get_selected_option=lambda coordinator: coordinator.data.get(
             "input_output_state", {}
