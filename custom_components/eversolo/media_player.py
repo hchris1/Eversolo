@@ -10,7 +10,14 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
 )
 
-from .const import CONF_ABLE_REMOTE_BOOT, DOMAIN, LOGGER
+from .const import (
+    CONF_ABLE_REMOTE_BOOT,
+    CONF_SHUTDOWN_ACTION,
+    DOMAIN,
+    LOGGER,
+    SHUTDOWN_ACTION_POWEROFF,
+    SHUTDOWN_ACTION_STANDBY,
+)
 from .coordinator import EversoloDataUpdateCoordinator
 from .entity import EversoloEntity
 
@@ -311,7 +318,13 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
 
     async def async_turn_off(self):
         """Turn off Media Player."""
-        await self.coordinator.client.async_trigger_power_off()
+        shutdown_action = self._config_entry.data.get(
+            CONF_SHUTDOWN_ACTION, SHUTDOWN_ACTION_POWEROFF
+        )
+        if shutdown_action == SHUTDOWN_ACTION_STANDBY:
+            await self.coordinator.client.async_trigger_standby()
+        else:
+            await self.coordinator.client.async_trigger_power_off()
         await self.coordinator.async_request_refresh()
 
     async def async_turn_on(self):

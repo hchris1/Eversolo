@@ -52,6 +52,12 @@ ENTITY_DESCRIPTIONS = [
         press_action=lambda coordinator: coordinator.client.async_trigger_power_off(),
     ),
     EversoloButtonDescription[EversoloDataUpdateCoordinator](
+        key="standby",
+        name="Standby",
+        icon="mdi:sleep",
+        press_action=lambda coordinator: coordinator.client.async_trigger_standby(),
+    ),
+    EversoloButtonDescription[EversoloDataUpdateCoordinator](
         key="power_on",
         name="Power On",
         icon="mdi:power-on",

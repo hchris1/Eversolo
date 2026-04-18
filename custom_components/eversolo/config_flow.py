@@ -14,13 +14,21 @@ from .api import (
     EversoloApiClientCommunicationError,
     EversoloApiClientError,
 )
-from .const import DEFAULT_PORT, DOMAIN, LOGGER, NAME
+from .const import (
+    DEFAULT_PORT,
+    DEFAULT_SHUTDOWN_ACTION,
+    DOMAIN,
+    LOGGER,
+    NAME,
+    SHUTDOWN_ACTION_OPTIONS,
+    CONF_SHUTDOWN_ACTION,
+)
 
 
 class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Eversolo."""
 
-    VERSION = 2
+    VERSION = 3
 
     async def async_step_user(
         self,
@@ -50,6 +58,9 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     LOGGER.warning("Failed to fetch device model: %s", exception)
                     model = None
                 title = f"{NAME} {model}" if model else NAME
+                user_input[CONF_SHUTDOWN_ACTION] = user_input.get(
+                    CONF_SHUTDOWN_ACTION, DEFAULT_SHUTDOWN_ACTION
+                )
                 return self.async_create_entry(
                     title=title,
                     data=user_input,
@@ -73,6 +84,15 @@ class EversoloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                             ),
                         ),
                         vol.Coerce(int),
+                    ),
+                    vol.Optional(
+                        CONF_SHUTDOWN_ACTION,
+                        default=(user_input or {}).get(CONF_SHUTDOWN_ACTION, DEFAULT_SHUTDOWN_ACTION),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=SHUTDOWN_ACTION_OPTIONS,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        ),
                     ),
                 }
             ),

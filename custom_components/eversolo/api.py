@@ -252,6 +252,15 @@ class EversoloApiClient:
             parseJson=False,
         )
 
+    async def async_trigger_standby(self) -> any:
+        """Powers off the device."""
+        await self._api_wrapper(
+            method="get",
+            url=f"http://{self._host}:{
+                self._port}/ZidooMusicControl/v2/setPowerOption?tag=standby",
+            parseJson=False,
+        )
+
     async def async_trigger_toggle_screen(self) -> any:
         """Toggles screen on/off."""
         await self._api_wrapper(

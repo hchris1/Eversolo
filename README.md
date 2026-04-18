@@ -23,6 +23,7 @@ It provides the following entities:
 | Button        | Cycle Screen Mode (Spectrum) | Same as Cycle Screen Mode with spectrum instead of VU                         |
 | Button        | Power Off                    | Turns off device                                                              |
 | Button        | Power On                     | Turns on device via Wake-on-LAN                                               |
+| Button        | Standby                      | Puts device into standby mode                                                 |
 | Button        | Reboot                       | Reboots device                                                                |
 | Button        | Toggle Screen On/Off         | Turns display on/off                                                          |
 | Button        | Turn Screen Off              | Turns display off                                                             |
@@ -51,6 +52,15 @@ Copy the `eversolo` folder from `Eversolo/custom_components` into your `custom_c
 ## Configuration
 
 You can configure the component using the `Add integration` dialog. Search for `Eversolo` and enter the host IP of your Eversolo streamer.
+
+### Shutdown Action
+
+During setup (or via the integration's configuration options), you can choose what action the media player's power button performs:
+
+- **Power Off** (default): Completely powers off the device
+- **Standby**: Puts the device into standby mode (lower power state, can wake up faster)
+
+Both options are available as separate buttons for manual control at any time. Changing this setting affects the media player's power button behavior in Home Assistant's media cards and the standard turn off service call.
 
 [commits-shield]: https://img.shields.io/github/commit-activity/y/hchris1/eversolo.svg?style=for-the-badge
 [commits]: https://github.com/hchris1/eversolo/commits/main

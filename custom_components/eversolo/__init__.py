@@ -47,6 +47,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_update_entry(entry, title=title, version=2)
         LOGGER.info("Migration to version 2 successful, title set to '%s'", title)
 
+    if entry.version == 2:
+        from .const import CONF_SHUTDOWN_ACTION, DEFAULT_SHUTDOWN_ACTION
+
+        new_data = {**entry.data, CONF_SHUTDOWN_ACTION: DEFAULT_SHUTDOWN_ACTION}
+        hass.config_entries.async_update_entry(entry, data=new_data, version=3)
+        LOGGER.info("Migration to version 3 successful, added shutdown_action config")
+
     return True
 
 
