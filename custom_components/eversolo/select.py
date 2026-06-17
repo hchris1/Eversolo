@@ -105,13 +105,18 @@ async def async_setup_entry(hass, entry, async_add_devices):
     if "knob_color_state" in coordinator.data:
         descriptions.append(KNOB_COLOR_DESCRIPTION)
 
-    async_add_devices(
+    entities = [
         EversoloSelect(
             coordinator=coordinator,
             entity_description=entity_description,
         )
         for entity_description in descriptions
-    )
+    ]
+    
+    # Append the dedicated Input Mode entity that handles flat dictionaries
+    entities.append(EversoloInputSelectEntity(coordinator))
+
+    async_add_devices(entities)
 
 
 class EversoloSelect(EversoloEntity, SelectEntity):
@@ -175,3 +180,58 @@ class EversoloSelect(EversoloEntity, SelectEntity):
 
         await self.entity_description.select_option(self.coordinator, index, tag)
         self._attr_current_option = option
+
+
+class EversoloInputSelectEntity(EversoloEntity, SelectEntity):
+    """Eversolo Input Mode Select."""
+
+    def __init__(self, coordinator: EversoloDataUpdateCoordinator):
+        """Initialize the select."""
+        super().__init__(coordinator)
+        self._attr_name = "Input Mode"
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_input_mode"
+        self._attr_icon = "mdi:import"
+
+    @property
+    def options(self) -> list[str]:
+        """Return available options."""
+        sources = self.coordinator.data.get("input_output_state", {}).get(
+            "transformed_sources", None
+        )
+        if sources is None:
+            return []
+        return list(sources.values())
+
+    @property
+    def current_option(self) -> str | None:
+        """Return current option."""
+        input_output_state = self.coordinator.data.get("input_output_state", None)
+        if input_output_state is None:
+            return None
+
+        sources = input_output_state.get("transformed_sources", None)
+        if sources is None:
+            return None
+
+        input_index = input_output_state.get("inputIndex", -1)
+        if input_index < 0 or input_index >= len(sources):
+            return None
+
+        return list(sources.values())[input_index]
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        sources = self.coordinator.data.get("input_output_state", {}).get(
+            "transformed_sources", None
+        )
+        if sources is None:
+            return
+
+        index = next(
+            (i for i, (k, v) in enumerate(sources.items()) if v == option), None
+        )
+        tag = next((k for k, v in sources.items() if v == option), None)
+
+        if index is not None and tag is not None:
+            await self.coordinator.client.async_set_input(index, tag)
+            await self.coordinator.async_request_refresh()

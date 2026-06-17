@@ -39,13 +39,22 @@ async def async_setup_entry(hass, entry, async_add_devices):
 class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
     """Eversolo Media Player."""
 
+    # Standard static fallback mapping for DMP-A6 hardware inputs
+    # Maps Friendly Name -> [API Integer ID, API String Tag]
+    DMP_A6_INPUTS = {
+        "Internal Player": [0, "eversolo"],
+        "USB-B Audio In": [1, "usb"],
+        "Optical In": [2, "optical"],
+        "Coaxial In": [3, "coaxial"],
+        "Bluetooth In": [5, "bluetooth"]
+    }
+
     def __init__(self, coordinator: EversoloDataUpdateCoordinator, config_entry):
         """Initialize the Media Player."""
         super().__init__(coordinator)
         self._attr_device_class = MediaPlayerDeviceClass.RECEIVER
         self._attr_supported_features = SUPPORT_FEATURES
-        self._attr_unique_id = f"{
-            coordinator.config_entry.entry_id}_media_player"
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_media_player"
         self._config_entry = config_entry
         self._attr_name = None
         self._state = None
@@ -121,38 +130,38 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         return music_control_state.get("volumeData", {}).get("isMute", None)
 
     @property
-    def source(self):
+    def source(self) -> str | None:
         """Return the current input source."""
-        input_output_state = self.coordinator.data.get(
-            "input_output_state", None)
-
-        if input_output_state is None:
-            return None
-
-        sources = self.coordinator.data.get("input_output_state", {}).get(
-            "transformed_sources", None
-        )
-
-        if sources is None:
-            return None
-
+        input_output_state = self.coordinator.data.get("input_output_state", {})
+        
+        # Check if coordinator has a valid dynamic input index
         input_index = input_output_state.get("inputIndex", -1)
-        if input_index < 0 or input_index >= len(sources):
-            LOGGER.debug("Input index %s is out of range", input_index)
-            return None
+        sources = input_output_state.get("transformed_sources", None)
 
-        return list(sources.values())[input_index]
+        if sources and 0 <= input_index < len(sources):
+            return list(sources.values())[input_index]
+
+        # Fallback tracking via music control playback type
+        music_control = self.coordinator.data.get("music_control_state", {})
+        play_type = music_control.get("playType", -1)
+        
+        if play_type == 5:
+            return "Internal Player"
+        elif play_type == 4:
+            return "Bluetooth In"
+            
+        return "Internal Player"
 
     @property
-    def source_list(self):
+    def source_list(self) -> list[str] | None:
         """List of available input sources."""
-        # NoneType object has no values
         sources = self.coordinator.data.get("input_output_state", {}).get(
             "transformed_sources", None
         )
 
-        if sources is None:
-            return None
+        # If the API dynamic sources are empty or only contain outputs, use the hardware map
+        if not sources or len(sources) <= 1:
+            return list(self.DMP_A6_INPUTS.keys())
 
         return list(sources.values())
 
@@ -327,8 +336,7 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
             return
 
         converted_volume = round(
-            volume * int(music_control_state.get("volumeData",
-                         {}).get("maxVolume", 0))
+            volume * int(music_control_state.get("volumeData", {}).get("maxVolume", 0))
         )
         await self.coordinator.client.async_set_volume(converted_volume)
         await self.coordinator.async_request_refresh()
@@ -348,25 +356,38 @@ class EversoloMediaPlayer(EversoloEntity, MediaPlayerEntity):
         await self.coordinator.client.async_mute()
         await self.coordinator.async_request_refresh()
 
-    async def async_select_source(self, source):
+    async def async_select_source(self, source: str) -> None:
         """Set the input source."""
         sources = self.coordinator.data.get("input_output_state", {}).get(
             "transformed_sources", None
         )
 
-        if sources is None:
+        index = None
+        tag = None
+
+        # Scenario A: The coordinator data populated correctly
+        if sources and len(sources) > 1:
+            for idx, (key, value) in enumerate(sources.items()):
+                if value == source or key == source:
+                    index = idx
+                    tag = key
+                    break
+
+        # Scenario B: Fallback to direct hardware routing commands
+        if (index is None or tag is None) and source in self.DMP_A6_INPUTS:
+            index = self.DMP_A6_INPUTS[source][0]
+            tag = self.DMP_A6_INPUTS[source][1]
+
+        if index is None or tag is None:
+            LOGGER.error("Selected source '%s' could not be resolved to a valid hardware track.", source)
             return
 
+        # Execute API call via integration client wrapper
         try:
-            index, tag = next(
-                (index, key)
-                for index, key in enumerate(sources)
-                if sources[key] == source or key == source
-            )
-        except StopIteration:
-            raise ValueError(f"Source {source} not found")
-
-        await self.coordinator.client.async_set_input(index, tag)
+            await self.coordinator.client.async_set_input(index, tag)
+            await self.coordinator.async_request_refresh()
+        except Exception as err:
+            LOGGER.error("Failed to execute target input shift via API client: %s", err)
 
     async def async_media_play_pause(self):
         """Simulate play pause Media Player."""
