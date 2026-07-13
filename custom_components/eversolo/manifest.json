@@ -2,14 +2,22 @@
   "domain": "eversolo",
   "name": "Eversolo",
   "codeowners": [
+    "@TheFab21",
     "@hchris1"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/hchris1/Eversolo",
+  "documentation": "https://github.com/TheFab21/Eversolo",
+  "integration_type": "device",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/hchris1/Eversolo/issues",
-  "requirements": [
-    "wakeonlan"
+  "issue_tracker": "https://github.com/TheFab21/Eversolo/issues",
+  "loggers": [
+    "custom_components.eversolo"
   ],
-  "version": "0.9.1"
+  "requirements": [
+    "wakeonlan==4.0.0"
+  ],
+  "version": "1.0.1b1",
+  "zeroconf": [
+    "_eversolo._tcp.local."
+  ]
 }

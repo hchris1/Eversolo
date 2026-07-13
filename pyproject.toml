@@ -1,0 +1,11 @@
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers --cov=_eversolo_api_tests.api --cov-report=term-missing"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true

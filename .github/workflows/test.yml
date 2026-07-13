@@ -1,4 +1,4 @@
-name: "Lint"
+name: "Tests"
 
 on:
   push:
@@ -12,16 +12,16 @@ permissions:
   contents: read
 
 jobs:
-  ruff:
-    name: "Ruff"
+  pytest:
+    name: "Pytest"
     runs-on: "ubuntu-latest"
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: "Checkout the repository"
         uses: "actions/checkout@v7.0.0"
 
       - name: "Set up Python"
-        uses: actions/setup-python@v6.3.0
+        uses: "actions/setup-python@v6.3.0"
         with:
           python-version: "3.14"
           cache: "pip"
@@ -29,8 +29,5 @@ jobs:
       - name: "Install requirements"
         run: python3 -m pip install -r requirements.txt
 
-      - name: "Run"
-        run: python3 -m ruff check .
-
-      - name: "Check formatting"
-        run: python3 -m ruff format --check .
+      - name: "Run tests"
+        run: python3 -m pytest

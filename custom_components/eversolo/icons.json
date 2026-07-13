@@ -1,0 +1,26 @@
+{
+  "entity": {
+    "button": {
+      "cycle_screen_mode": { "default": "mdi:gauge" },
+      "cycle_screen_mode_spectrum": { "default": "mdi:chart-histogram" },
+      "power_off": { "default": "mdi:power-off" },
+      "power_on": { "default": "mdi:power-on" },
+      "reboot": { "default": "mdi:restart" },
+      "standby": { "default": "mdi:power-sleep" },
+      "toggle_screen": { "default": "mdi:monitor-shimmer" },
+      "turn_screen_off": { "default": "mdi:monitor-off" },
+      "turn_screen_on": { "default": "mdi:monitor-eye" }
+    },
+    "light": {
+      "display": { "default": "mdi:monitor" },
+      "knob": { "default": "mdi:knob" }
+    },
+    "select": {
+      "knob_color": { "default": "mdi:palette" },
+      "output_mode": { "default": "mdi:audio-input-stereo-minijack" },
+      "streaming_app": { "default": "mdi:apps" },
+      "spectrum_style": { "default": "mdi:chart-histogram" },
+      "vu_style": { "default": "mdi:gauge-low" }
+    }
+  }
+}

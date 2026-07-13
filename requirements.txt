@@ -1,5 +1,6 @@
-aiohasupervisor==0.4.3
-colorlog==6.10.1
-homeassistant==2026.4.0
-pip>=21.0,<26.1
-ruff==0.15.9
+homeassistant==2026.7.2
+pytest==9.0.3
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0
+pytest-homeassistant-custom-component==0.13.346
+ruff==0.15.21

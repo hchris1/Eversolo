@@ -1,0 +1,79 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Cet appareil Eversolo est déjà configuré.",
+      "unknown": "L’appareil découvert n’a pas pu être identifié."
+    },
+    "error": {
+      "auth": "L’appareil a refusé la connexion.",
+      "connection": "Impossible de joindre l’appareil Eversolo.",
+      "unknown": "L’appareil a renvoyé une réponse inattendue."
+    },
+    "step": {
+      "confirm": {
+        "description": "Configurer l’appareil Eversolo découvert ?"
+      },
+      "reconfigure": {
+        "description": "Modifiez l’adresse réseau utilisée pour joindre cet appareil Eversolo.",
+        "data": {
+          "host": "Hôte",
+          "port": "Port"
+        }
+      },
+      "user": {
+        "description": "Saisissez l’adresse locale de votre appareil Eversolo. Le port API par défaut est 9529.",
+        "data": {
+          "host": "Hôte",
+          "port": "Port"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Choisissez comment Home Assistant doit éteindre l’Eversolo.",
+        "data": {
+          "power_behavior": "Comportement du bouton d’arrêt"
+        }
+      }
+    }
+  },
+  "selector": {
+    "power_behavior": {
+      "options": {
+        "poweroff": "Éteindre complètement",
+        "standby": "Mettre en veille"
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "cycle_screen_mode": { "name": "Changer l’affichage VU" },
+      "cycle_screen_mode_spectrum": { "name": "Changer l’affichage du spectre" },
+      "power_off": { "name": "Éteindre" },
+      "power_on": { "name": "Allumer" },
+      "reboot": { "name": "Redémarrer" },
+      "standby": { "name": "Mettre en veille" },
+      "toggle_screen": { "name": "Basculer l’écran" },
+      "turn_screen_off": { "name": "Éteindre l’écran" },
+      "turn_screen_on": { "name": "Allumer l’écran" }
+    },
+    "light": {
+      "display": { "name": "Écran" },
+      "knob": { "name": "Molette" }
+    },
+    "select": {
+      "knob_color": { "name": "Couleur de la molette" },
+      "output_mode": { "name": "Sortie audio" },
+      "streaming_app": { "name": "Application musicale" },
+      "spectrum_style": { "name": "Style du spectre" },
+      "vu_style": { "name": "Style du vu-mètre" }
+    }
+  },
+  "exceptions": {
+    "source_not_found": {
+      "message": "La source {source} n’est plus disponible sur cet appareil."
+    }
+  }
+}
