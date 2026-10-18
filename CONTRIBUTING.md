@@ -1,39 +1,39 @@
-# Contribution guidelines
+# Contributing
 
-Contributing to this project should be as easy and transparent as possible, whether it's:
+Contributions and hardware validation are welcome.
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
+## Before opening a pull request
 
-## Github is used for everything
+1. Create a focused branch.
+2. Keep existing entity unique IDs unless the change includes a tested migration.
+3. Never hard-code input or output lists for one Eversolo model.
+4. Add or update response fixtures for each affected model/firmware.
+5. Run:
 
-Github is used to host code, to track issues and feature requests, as well as accept pull requests.
+    python -m ruff check .
+    python -m ruff format --check .
+    python -m pytest
 
-Pull requests are the best way to propose changes to the codebase.
+## API changes
 
-1. Fork the repo and create your branch from `main`.
-2. If you've changed something, update the documentation.
-3. Make sure your code lints (using `scripts/lint`).
-4. Test you contribution.
-5. Issue that pull request!
+The Eversolo/Zidoo API differs by model and firmware. New endpoints should:
 
-## Report bugs using Github's [issues](../../issues)
+- use structured query parameters;
+- map unsupported status codes to EversoloApiClientUnsupportedError;
+- avoid adding extra calls to the two-second polling path;
+- preserve the previous cached value when an optional setting temporarily fails;
+- include sanitized sample responses and tests.
 
-GitHub issues are used to track public bugs.
-Report a bug by [opening a new issue](../../issues/new/choose); it's that easy!
+Do not include passwords, IP addresses, MAC addresses, library paths, account data, or media URLs from a real installation.
 
-## Write bug reports with detail, background, and sample code
+## Bug reports
 
-**Great Bug Reports** tend to have:
+Use the templates in this repository and include:
 
-- A quick summary and/or background
-- Steps to reproduce
-  - Be specific!
-  - Give sample code if you can.
-- What you expected would happen
-- What actually happens
-- Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
+- model and firmware;
+- Home Assistant version;
+- integration version;
+- redacted diagnostics;
+- exact reproduction steps.
 
-People *love* thorough bug reports.
+Report issues at [TheFab21/Eversolo](https://github.com/TheFab21/Eversolo/issues).

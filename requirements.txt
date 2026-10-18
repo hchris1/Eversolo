@@ -1,5 +1,6 @@
-aiohasupervisor==0.4.3
-colorlog==6.10.1
-homeassistant==2026.4.0
-pip>=21.0,<26.1
-ruff==0.15.9
+# pytest-homeassistant-custom-component pins homeassistant, pytest,
+# pytest-asyncio and pytest-cov to exact versions. Repeating those pins here
+# only lets a dependency bump contradict the plugin, which makes the install
+# unresolvable, so the plugin alone decides them.
+pytest-homeassistant-custom-component==0.13.346
+ruff==0.15.21

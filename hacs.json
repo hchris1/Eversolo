@@ -1,8 +1,5 @@
 {
     "name": "Eversolo Integration",
-    "filename": "eversolo.zip",
     "hide_default_branch": true,
-    "homeassistant": "2024.12.5",
-    "render_readme": true,
-    "zip_release": true
+    "homeassistant": "2026.7.0"
 }

@@ -1,18 +1,85 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Enter the host IP of the Eversolo device. For tested devices, the port can be left default.",
-                "data": {
-                    "host": "Host",
-                    "port": "Port"
-                }
-            }
-        },
-        "error": {
-            "auth": "Host is wrong.",
-            "connection": "Unable to connect to the server.",
-            "unknown": "Unknown error occurred."
+  "config": {
+    "abort": {
+      "already_configured": "This Eversolo device is already configured.",
+      "unknown": "The discovered device could not be identified."
+    },
+    "error": {
+      "auth": "The device rejected the connection.",
+      "connection": "Unable to connect to the Eversolo device.",
+      "unknown": "The device returned an unexpected response."
+    },
+    "step": {
+      "confirm": {
+        "description": "Set up the discovered Eversolo device?"
+      },
+      "reconfigure": {
+        "description": "Update the network address used to reach this Eversolo device.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
         }
+      },
+      "user": {
+        "description": "Enter the local address of your Eversolo device. The default API port is 9529.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Choose how Home Assistant should turn off the Eversolo.",
+        "data": {
+          "power_behavior": "Power button behavior"
+        }
+      }
+    }
+  },
+  "selector": {
+    "power_behavior": {
+      "options": {
+        "poweroff": "Power off",
+        "standby": "Standby"
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "cycle_screen_mode": { "name": "Cycle VU display" },
+      "cycle_screen_mode_spectrum": { "name": "Cycle spectrum display" },
+      "power_off": { "name": "Power off" },
+      "power_on": { "name": "Power on" },
+      "reboot": { "name": "Reboot" },
+      "standby": { "name": "Standby" },
+      "toggle_screen": { "name": "Toggle screen" },
+      "turn_screen_off": { "name": "Turn screen off" },
+      "turn_screen_on": { "name": "Turn screen on" }
+    },
+    "light": {
+      "display": { "name": "Display" },
+      "knob": { "name": "Knob" }
+    },
+    "select": {
+      "knob_color": { "name": "Knob color" },
+      "output_mode": { "name": "Audio output" },
+      "streaming_app": { "name": "Music application" },
+      "spectrum_style": { "name": "Spectrum style" },
+      "vu_style": { "name": "VU meter style" }
+    }
+  },
+  "exceptions": {
+    "source_not_found": {
+      "message": "The source {source} is not available on this Eversolo. Available sources: {sources}."
+    },
+    "source_select_failed": {
+      "message": "Could not select {source} on this Eversolo: {error}"
+    },
+    "media_id_not_supported": {
+      "message": "This Eversolo plays items from its own library, queue and apps, not the media identifier {media_id}. Pick an item from the media browser, or select it by name with media_player.select_source."
+    }
+  }
 }

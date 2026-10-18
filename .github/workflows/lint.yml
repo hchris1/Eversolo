@@ -8,22 +8,29 @@ on:
     branches:
       - "main"
 
+permissions:
+  contents: read
+
 jobs:
   ruff:
     name: "Ruff"
     runs-on: "ubuntu-latest"
+    timeout-minutes: 10
     steps:
-        - name: "Checkout the repository"
-          uses: "actions/checkout@v6.0.2"
+      - name: "Checkout the repository"
+        uses: "actions/checkout@v7.0.1"
 
-        - name: "Set up Python"
-          uses: actions/setup-python@v6.2.0
-          with:
-            python-version: "3.14"
-            cache: "pip"
+      - name: "Set up Python"
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.14"
+          cache: "pip"
 
-        - name: "Install requirements"
-          run: python3 -m pip install -r requirements.txt
+      - name: "Install requirements"
+        run: python3 -m pip install -r requirements.txt
 
-        - name: "Run"
-          run: python3 -m ruff check .
+      - name: "Run"
+        run: python3 -m ruff check .
+
+      - name: "Check formatting"
+        run: python3 -m ruff format --check .
